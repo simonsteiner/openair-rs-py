@@ -11,10 +11,19 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+## Python Bindings (openair-rs-py)
 
-### Unreleased
+### v0.1.0 (2025-06-25)
 
-- ...
+- [added] Python bindings for OpenAir airspace file parser
+- [added] `parse_string()` function to parse OpenAir data from strings
+- [added] `parse_file()` function to parse OpenAir files
+- [added] Python-friendly API returning standard Python dictionaries
+- [added] Support for all OpenAir format features: airspace metadata, polygon points, circles, arcs, and extension records
+- [added] Maturin-based build system for Python module compilation
+- [added] Python examples and documentation
+
+## Original Rust Crate (openair-rs)
 
 ### v0.3.2 (2024-10-12)
 
