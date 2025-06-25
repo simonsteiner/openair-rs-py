@@ -1139,3 +1139,7 @@ mod tests {
         }
     }
 }
+
+// Python bindings
+#[cfg(feature = "python")]
+mod python;
