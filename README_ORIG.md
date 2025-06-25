@@ -6,10 +6,9 @@
 A Rust parser for airspace files in OpenAir format (used by flight instruments
 like Skytraxx and others).
 
-http://www.winpilot.com/UsersGuide/UserAirspace.asp (see also `FORMAT.txt`)
+<http://www.winpilot.com/UsersGuide/UserAirspace.asp> (see also `FORMAT.txt`)
 
-Docs: https://docs.rs/openair/
-
+Docs: <https://docs.rs/openair/>
 
 ## Status
 
@@ -23,7 +22,6 @@ Supported file format features:
 - [x] Support AY/AF/AG extension records
 
 Label placement hints (AT) and style records (SP, SB) are not supported.
-
 
 ## Implementation Notes
 
@@ -40,34 +38,30 @@ record) or when the file ends.
 **NOTE: Altitude levels without a unit specifier (e.g. "1000 GND") will be
 treated as feet!)**
 
-
 ## Example
 
 You can try the parser using the example program:
 
-    $ cargo run --example parse_file example_data/Switzerland.txt
-
+    cargo run --example parse_file example_data/Switzerland.txt
 
 ## Serde Serialization
 
 To include serialization of all data types, enable the `serde` feature.
 
-
 ## License
 
 Licensed under either of
 
- * Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-   http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or
-   http://opensource.org/licenses/MIT) at your option.
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+   <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or
+   <http://opensource.org/licenses/MIT>) at your option.
 
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall
 be dual licensed as above, without any additional terms or conditions.
-
 
 <!-- Badges -->
 [circle-ci]: https://circleci.com/gh/dbrgn/openair-rs/tree/master
