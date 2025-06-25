@@ -13,6 +13,12 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
+### v0.1.1 (2025-06-25)
+
+- [changed] Update pyo3 dependency to version 0.25
+- [added] Support for Python 3.13 in project files
+- [fixed] GitHub Actions CI workflow with matrix builds and manual dispatch trigger
+
 ### v0.1.0 (2025-06-25)
 
 - [added] Python bindings for OpenAir airspace file parser
