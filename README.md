@@ -10,6 +10,8 @@ This directory contains Python bindings for the OpenAir airspace file parser wri
 
 see also [FORMAT.txt](./FORMAT.txt)
 
+For future improvements (version 2.1), see: <https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md>
+
 ## Features
 
 - Fast OpenAir file parsing using Rust
@@ -27,24 +29,30 @@ see also [FORMAT.txt](./FORMAT.txt)
 2. **Python 3.8+**
 3. **Maturin**: Install with `pip install maturin`
 
-### Building the Python Module
+### Building and Installation
+
+#### Setup Virtual Environment (Recommended)
 
 ```bash
-# In this directory (/misc/openair-rs/)
-maturin develop --features python
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install maturin in the virtual environment
+pip install maturin
 ```
 
-This will compile the Rust code and install the Python module in your current environment.
-
-### For Development
+#### Build Commands
 
 ```bash
-# Build in development mode with debug symbols
+# Development build with debug symbols (installs directly into current environment)
 maturin develop --features python
 
-# Build optimized release version
+# Release build for distribution (creates wheel file)
 maturin build --release --features python
 ```
+
+Use `maturin develop` for development - it compiles the Rust code and installs the Python module directly into your current environment. Use `maturin build --release` when you need to create distribution wheels.
 
 ## Usage
 
