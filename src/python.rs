@@ -66,7 +66,7 @@ fn parse_openair_file(filepath: String) -> PyResult<String> {
 
 /// A Python module for parsing OpenAir airspace files
 #[pymodule]
-fn openair(_py: Python, m: &PyModule) -> PyResult<()> {
+fn openair(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(parse_openair_string, m)?)?;
     m.add_function(wrap_pyfunction!(parse_openair_file, m)?)?;
     Ok(())
