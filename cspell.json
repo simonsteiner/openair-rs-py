@@ -1,0 +1,18 @@
+{
+    "version": "0.2",
+    "ignorePaths": ["example_data/**"],
+    "dictionaryDefinitions": [
+        {
+            "name": "openair-rs-py",
+            "path": "./cspell-dictionary.txt"
+        }
+    ],
+    "dictionaries": [
+        "openair-rs-py",
+        "python",
+        "rust"
+    ],
+    "words": [],
+    "ignoreWords": [],
+    "import": []
+}

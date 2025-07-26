@@ -35,11 +35,15 @@ For future improvements (version 2.1), see: <https://github.com/naviter/seeyou_f
 
 ```bash
 # Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python3 -m venv .venv
+# (Optional) If Python 3.13 is installed, create virtual environment with:
+python3.13 -m venv .venv
+source .venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install maturin in the virtual environment
-pip install maturin
+# Install dependencies (inside the virtual environment)
+pip install --upgrade pip
+# Install the package in editable mode with all development dependencies
+pip install -e ".[dev]"
 ```
 
 #### Build Commands
@@ -102,3 +106,28 @@ The parser returns airspaces as Python dictionaries with this structure:
   }
 }
 ```
+
+---
+
+## Code Quality & Formatting
+
+To keep the codebase clean and consistent, use the following tools. You can run them manually, or automatically before each commit using pre-commit hooks:
+
+### Pre-commit Hook Setup
+
+1. Install pre-commit (once per machine): `pip install pre-commit`
+2. Install the hooks (once per clone): `pre-commit install`
+3. Now, every commit will automatically run:
+
+   ```bash
+   flake8 python/ --extend-ignore E501,E203
+   mypy python/
+   isort python/
+   black python/
+   pydocstyle --convention=google python/
+   npx cspell python/
+   ```
+
+You can also run all hooks manually: `pre-commit run --all-files` or specific hooks `pre-commit run cspell --all-files`
+
+If you need to skip hooks for a commit, use `git commit --no-verify`.
