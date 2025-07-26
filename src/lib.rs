@@ -58,12 +58,12 @@ pub enum Class {
     /// Controlled Traffic Region
     #[cfg_attr(feature = "serde", serde(rename = "CTR"))]
     Ctr,
+    /// Prohibited area
+    Prohibited,
     /// Restricted area
     Restricted,
     /// Danger area
     Danger,
-    /// Prohibited area
-    Prohibited,
     /// Prohibited for gliders
     GliderProhibited,
     /// Wave window
@@ -72,6 +72,39 @@ pub enum Class {
     RadioMandatoryZone,
     /// Transponder mandatory zone
     TransponderMandatoryZone,
+    /// OpenAir extension records for French airspace classes.
+    /// These extensions are documented in the following repository:
+    /// https://github.com/BPascal-91/eAirspacesFormats/tree/master/openair/#openair-extended---version-actuelle-%C3%A9tandue-avec-historique-des-%C3%A9volutions-
+    /// NOTAM
+    Notam,
+    /// NOTAM reference
+    NotamRef,
+    /// Zone Sensibilité Majeur
+    Zsm,
+    /// FFVL Protocole for PARAGLIDER
+    Ffvl,
+    /// FFVP Protocole for GLIDER
+    Ffvp,
+    /// Service d'Information en Vol
+    Siv,
+    /// Regulated Air Space
+    Ras,
+    /// Air Defense Identification Zone
+    Adiz,
+    /// Minimum Altitude Area
+    Ama,
+    /// PART of airspace
+    Part,
+    /// Flight Information Region
+    Fir,
+    /// Upper Flight Information Region
+    Uir,
+    /// Oceanic Control Area
+    Oca,
+    /// Political-administrative area
+    Political,
+    /// Airspace for which not even an FIR is defined
+    NoFir,
 }
 
 impl fmt::Display for Class {
@@ -91,13 +124,28 @@ impl Class {
             "F" => Ok(Self::F),
             "G" => Ok(Self::G),
             "CTR" => Ok(Self::Ctr),
+            "P" => Ok(Self::Prohibited),
             "R" => Ok(Self::Restricted),
             "Q" => Ok(Self::Danger),
-            "P" => Ok(Self::Prohibited),
             "GP" => Ok(Self::GliderProhibited),
             "W" => Ok(Self::WaveWindow),
             "RMZ" => Ok(Self::RadioMandatoryZone),
             "TMZ" => Ok(Self::TransponderMandatoryZone),
+            "NOTAM" => Ok(Self::Notam),
+            "NOTAM ref" | "NOTAMREF" => Ok(Self::NotamRef),
+            "ZSM" => Ok(Self::Zsm),
+            "FFVL" => Ok(Self::Ffvl),
+            "FFVP" => Ok(Self::Ffvp),
+            "SIV" => Ok(Self::Siv),
+            "RAS" => Ok(Self::Ras),
+            "ADIZ" => Ok(Self::Adiz),
+            "AMA" => Ok(Self::Ama),
+            "PART" => Ok(Self::Part),
+            "FIR" => Ok(Self::Fir),
+            "UIR" => Ok(Self::Uir),
+            "OCA" => Ok(Self::Oca),
+            "POLITICAL" => Ok(Self::Political),
+            "NO-FIR" | "NOFIR" => Ok(Self::NoFir),
             other => Err(format!("Invalid class: {}", other)),
         }
     }
@@ -936,6 +984,191 @@ mod tests {
                 assert_eq!(segments.len(), 5);
             } else {
                 panic!("Unexpected enum variant");
+            }
+        }
+
+        /// Parsing of NOTAM reference class.
+        #[test]
+        fn parse_notamref() {
+            assert_eq!(Class::parse("NOTAMREF").unwrap(), Class::NotamRef);
+            assert_eq!(Class::parse("NOTAM ref").unwrap(), Class::NotamRef);
+        }
+
+        /// Test parsing of a real-world FFVL airspace example.
+        #[test]
+        fn parse_ffvl_mundolsheim() {
+            let mut airspace = indoc!(
+                "
+                * en: (c) FFVL 14/02/2007 - Activité de vol libre de Mundolsheim. Afin de
+                *     permettre le déroulement d'une activité de vol libre ŕ Mundolsheim en
+                *     espace aérien non contrôlé, un volume a été exclu en permanence de la CTR
+                *     1 Strasbourg Entzheim de classe D.
+                AC FFVL
+                AN FFVL-Prot Vol libre Mundolsheim (PARAGLIDER) (LFFFVLMundolsheim)
+                AH 500ft AGL
+                AL GND
+                V X=48:38:00.00 N 007:42:34.00 E
+                DC 1.0
+            "
+            )
+            .as_bytes();
+            let mut spaces = parse(&mut airspace).unwrap();
+            assert_eq!(spaces.len(), 1);
+            let space: Airspace = spaces.pop().unwrap();
+            assert_eq!(
+                space.class,
+                Class::Ffvl,
+                "Expected class FFVL, got {:?}",
+                space.class
+            );
+            assert_eq!(
+                space.name,
+                "FFVL-Prot Vol libre Mundolsheim (PARAGLIDER) (LFFFVLMundolsheim)"
+            );
+            assert_eq!(space.upper_bound, Altitude::FeetAgl(500));
+            assert_eq!(space.lower_bound, Altitude::Gnd);
+            match space.geom {
+                Geometry::Circle {
+                    centerpoint,
+                    radius,
+                } => {
+                    assert!((centerpoint.lat - 48.63333333333333).abs() < 1e-8);
+                    assert!((centerpoint.lng - 7.709444444444444).abs() < 1e-8);
+                    assert!((radius - 1.0).abs() < 1e-6);
+                }
+                _ => panic!("Expected circle geometry"),
+            }
+        }
+
+        /// Test parsing of a real-world ZSM airspace example.
+        #[test]
+        fn parse_zsm_gypaete_barbu() {
+            let mut airspace = indoc!(
+                "
+                AC ZSM
+                AY PROTECT
+                AN PROTECT 2827 Gypaete barbu - Zone Tampon 300m/sol (BIRD)
+                *AUID GUId=LFZSMDSTAC2827 UId=28 Id=LFZSMDSTAC2827
+                *AAlt [\"SFC/985FT AGL\", \"0m/2795m\"]
+                *ADescr [Pascal Bazile (c) 04/2025] ZSM T-73 HM 014 | N-22-0000092 | Andagne 1 - (2827) [source - https://parapente.ffvl.fr/harmonie-rapaces]
+                *AActiv [TIMSH] Survol interdit à moins de 300m/sol; période: 1=(01/01->31/08) 2=(01/11->31/12)
+                *ATimes {\"1\": [\"UTC(01/01->31/08)\", \"ANY(00:00->23:59)\"], \"2\": [\"UTC(01/11->31/12)\", \"ANY(00:00->23:59)\"]}
+                AH 985FT AGL
+                AL SFC
+                DP 45:20:35 N 007:01:35 E
+                DP 45:20:53 N 007:01:45 E
+                DP 45:20:59 N 007:01:51 E
+                DP 45:20:59 N 007:02:12 E
+                DP 45:20:50 N 007:02:29 E
+                DP 45:20:47 N 007:02:32 E
+                DP 45:20:41 N 007:02:34 E
+                DP 45:20:27 N 007:02:35 E
+                DP 45:20:17 N 007:02:37 E
+                DP 45:20:12 N 007:02:43 E
+                DP 45:20:09 N 007:02:44 E
+                DP 45:20:07 N 007:02:41 E
+                DP 45:20:03 N 007:02:39 E
+                DP 45:19:51 N 007:02:27 E
+                DP 45:19:50 N 007:02:19 E
+                DP 45:19:48 N 007:02:13 E
+                DP 45:19:42 N 007:02:12 E
+                DP 45:19:41 N 007:01:39 E
+                DP 45:19:43 N 007:01:29 E
+                DP 45:19:48 N 007:01:26 E
+                DP 45:19:55 N 007:01:32 E
+                DP 45:20:03 N 007:01:32 E
+                DP 45:20:09 N 007:01:30 E
+                DP 45:20:12 N 007:01:31 E
+                DP 45:20:18 N 007:01:24 E
+                DP 45:20:24 N 007:01:25 E
+                DP 45:20:35 N 007:01:35 E
+                "
+            )
+            .as_bytes();
+            let mut spaces = parse(&mut airspace).unwrap();
+            assert_eq!(spaces.len(), 1);
+            let space: Airspace = spaces.pop().unwrap();
+            assert_eq!(space.class, Class::Zsm);
+            assert_eq!(space.type_, Some("PROTECT".to_string()));
+            assert_eq!(
+                space.name,
+                "PROTECT 2827 Gypaete barbu - Zone Tampon 300m/sol (BIRD)"
+            );
+            assert_eq!(space.upper_bound, Altitude::FeetAgl(985));
+            assert_eq!(space.lower_bound, Altitude::Gnd);
+            match space.geom {
+                Geometry::Polygon { segments } => {
+                    // Should be 27 points (closed polygon)
+                    assert_eq!(segments.len(), 27);
+                    // Check first and last point are the same
+                    if let (PolygonSegment::Point(first), PolygonSegment::Point(last)) =
+                        (&segments[0], &segments[segments.len() - 1])
+                    {
+                        assert!((first.lat - last.lat).abs() < 1e-8);
+                        assert!((first.lng - last.lng).abs() < 1e-8);
+                    }
+                }
+                _ => panic!("Expected polygon geometry"),
+            }
+        }
+
+        /// Test parsing of a real-world FFVP airspace example.
+        #[test]
+        fn parse_ffvp_echo2() {
+            let mut airspace = indoc!(
+                "
+                AC FFVP
+                AY FFVP-Prot
+                AN FFVP-Prot RMZ ECHO 2 App(122.550 puis 122.500) (GLIDER)
+                AF 122.550 puis 122.500
+                *AUID GUId=LFFFVPECHO2 UId=29 Id=LFFFVPECHO2
+                *AAlt [\"3300FT AMSL/4000FT AMSL\", \"1005m/1219m\"]
+                *ADescr (c) FFVP 13/03/2017 - COULOIRS DE TRANSIT COGNAC - Premier contact à réaliser sur fréquence 122.550 Mhz (répondeur automatique si terrain fermé). Après premier contact, veille sur la fréquence vol à voile 122.500 Mhz ou autre fréquence particulière annoncée par le planeur aux contrôleurs de Cognac. Lapproche de Cognac précisera, lors de ce premier contact, laltitude maximale utilisable dans le couloir. Les planeurs devront être sur la fréquence 122.55 Mhz pour toute évolution au-dessus de cette altitude définie ou en dehors des couloirs. De plus, un report de position devra être fait sur la fréquence 122.55 Mhz toutes les 30 min, et/ouavant de quitter la zone
+                *AActiv [HX] Premier contact sur fréquence 122.550 Mhz. Ensuite, veille radio permanente sur 122.500 Mhz - (Protocole) https://federation.ffvl.fr/sites/ffvl.fr/files/Cognac_0.pdf
+                *AMhz {\"APP\": [\"122.550 puis 122.500\"], \"APP1\": [\"122.550\"], \"APP2\": [\"122.500\"], \"MHZ\": [\"122.55\"]}
+                AH 4000FT AMSL
+                AL 3300FT AMSL
+                DP 45:38:16 N 000:02:40 E
+                DP 45:37:23 N 000:16:54 E
+                DP 45:46:50 N 000:20:11 E
+                DP 46:00:00 N 000:23:19 E
+                DP 45:53:54 N 000:10:44 E
+                DP 45:48:38 N 000:08:00 E
+                V X=45:49:26 N 000:01:58 W
+                V D=+
+                DB 45:48:38 N 000:08:00 E, 45:45:41 N 000:06:29 E
+                DP 45:45:41 N 000:06:29 E
+                DP 45:38:16 N 000:02:40 E
+                "
+            )
+            .as_bytes();
+            let mut spaces = parse(&mut airspace).unwrap();
+            assert_eq!(spaces.len(), 1);
+            let space: Airspace = spaces.pop().unwrap();
+            assert_eq!(space.class, Class::Ffvp);
+            assert_eq!(space.type_, Some("FFVP-Prot".to_string()));
+            assert_eq!(
+                space.name,
+                "FFVP-Prot RMZ ECHO 2 App(122.550 puis 122.500) (GLIDER)"
+            );
+            assert_eq!(space.frequency, Some("122.550 puis 122.500".to_string()));
+            assert_eq!(space.upper_bound, Altitude::FeetAmsl(4000));
+            assert_eq!(space.lower_bound, Altitude::FeetAmsl(3300));
+            match space.geom {
+                Geometry::Polygon { segments } => {
+                    // Should be 9 segments: 6 DP, 1 Arc (DB), 2 DP
+                    assert_eq!(segments.len(), 9);
+                    // Check first and last point are the same (polygon closed)
+                    if let (PolygonSegment::Point(first), PolygonSegment::Point(last)) =
+                        (&segments[0], &segments[segments.len() - 1])
+                    {
+                        assert!((first.lat - last.lat).abs() < 1e-8);
+                        assert!((first.lng - last.lng).abs() < 1e-8);
+                    }
+                    // Check that there is at least one Arc segment
+                    assert!(segments.iter().any(|seg| matches!(seg, PolygonSegment::Arc(_))));
+                }
+                _ => panic!("Expected polygon geometry"),
             }
         }
 
