@@ -72,10 +72,9 @@ pub enum Class {
     RadioMandatoryZone,
     /// Transponder mandatory zone
     TransponderMandatoryZone,
-    ///
-    /// OpenAir extension records from
+    /// OpenAir extension records for French airspace classes.
+    /// These extensions are documented in the following repository:
     /// https://github.com/BPascal-91/eAirspacesFormats/tree/master/openair/#openair-extended---version-actuelle-%C3%A9tandue-avec-historique-des-%C3%A9volutions-
-    /// 
     /// NOTAM
     Notam,
     /// NOTAM reference
