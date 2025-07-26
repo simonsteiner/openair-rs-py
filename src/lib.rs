@@ -217,6 +217,10 @@ impl Altitude {
                 let is_digit_or_dot = |c: &char| c.is_ascii_digit() || *c == '.';
                 let number: String = other.chars().take_while(is_digit_or_dot).collect();
                 let rest: String = other.chars().skip_while(is_digit_or_dot).collect();
+                // Validate that number contains at most one dot
+                if number.chars().filter(|&c| c == '.').count() > 1 {
+                    return Err(format!("Invalid altitude: multiple dots in number '{}'", number));
+                }
                 lazy_static! {
                     static ref RE_FT_AMSL: Regex = Regex::new(r"(?i)^ft(:? a?msl)?$").unwrap();
                     static ref RE_M_AMSL: Regex = Regex::new(r"(?i)^m(:?sl)?$").unwrap();
@@ -947,6 +951,10 @@ mod tests {
             assert!(Altitude::parse("FLabc").is_err());
             // Should error for out-of-bounds meters
             assert!(Altitude::parse("654553016m").is_err());
+            // Should error for multiple dots in number
+            assert!(Altitude::parse("4500.0.5FT").is_err());
+            assert!(Altitude::parse("123..45 ft").is_err());
+            assert!(Altitude::parse("..123 ft").is_err());
         }
     }
 
