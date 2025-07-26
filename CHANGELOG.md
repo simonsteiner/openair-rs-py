@@ -13,6 +13,19 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
+### v0.1.2 (2025-07-26)
+
+- [added] .isort.cfg for import sorting configuration
+- [added] .pre-commit-config.yaml for pre-commit hooks
+- [added] cspell-dictionary.txt and cspell.json for spell checking
+- [added] mypy.ini for type checking configuration
+- [added] Optional development dependencies in pyproject.toml
+- [changed] Updated README.md with pre-commit setup instructions
+- [changed] Enhanced mypy configuration to specify files and paths
+- [changed] Improved example.py with refined comments and file parsing demo
+- [changed] Corrected formatting and added type hints in __init__.py and __init__.pyi
+- [changed] Refactored RELEASING.md for improved readability and formatting consistency
+
 ### v0.1.1 (2025-06-25)
 
 - [changed] Update pyo3 dependency to version 0.25
