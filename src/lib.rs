@@ -228,6 +228,15 @@ impl Altitude {
                 if !number.is_empty() {
                     // Try to parse as float, then as int
                     if let Ok(val_f) = number.parse::<f64>() {
+                        // Only allow conversion if the float is very close to a whole number
+                        if val_f.fract().abs() > 1e-6 {
+                            // Instead of error, return Ok with rounded value and log info
+                            log::info!(
+                                "Altitude value '{}' was rounded to nearest integer ({})",
+                                number,
+                                val_f.round() as i32
+                            );
+                        }
                         let val = val_f.round() as i32;
                         let trimmed = rest.trim();
                         if RE_FT_AMSL.is_match(trimmed) {
@@ -897,6 +906,18 @@ mod tests {
             assert_eq!(Altitude::parse("500ft agl").unwrap(), Altitude::FeetAgl(500));
             assert_eq!(Altitude::parse("500.0FT GND").unwrap(), Altitude::FeetAgl(500));
             assert_eq!(Altitude::parse("500 m agl").unwrap(), Altitude::FeetAgl(1640));
+        }
+
+        #[test]
+        fn parse_rounded_float_altitude() {
+            // Values that are not exactly whole numbers, but close enough to be rounded
+            assert_eq!(Altitude::parse("4500.4 ft").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(Altitude::parse("4500.6 ft").unwrap(), Altitude::FeetAmsl(4501));
+            assert_eq!(Altitude::parse("500.49 ft agl").unwrap(), Altitude::FeetAgl(500));
+            assert_eq!(Altitude::parse("500.51 ft agl").unwrap(), Altitude::FeetAgl(501));
+            // Values with a significant fractional part should still be accepted, but log info
+            assert_eq!(Altitude::parse("1234.123 ft").unwrap(), Altitude::FeetAmsl(1234));
+            assert_eq!(Altitude::parse("999.999 ft agl").unwrap(), Altitude::FeetAgl(1000));
         }
 
         #[test]
