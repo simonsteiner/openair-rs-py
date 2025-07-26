@@ -987,6 +987,13 @@ mod tests {
             }
         }
 
+        /// Parsing of NOTAM reference class.
+        #[test]
+        fn parse_notamref() {
+            assert_eq!(Class::parse("NOTAMREF").unwrap(), Class::NotamRef);
+            assert_eq!(Class::parse("NOTAM ref").unwrap(), Class::NotamRef);
+        }
+
         /// Test parsing of a real-world FFVL airspace example.
         #[test]
         fn parse_ffvl_mundolsheim() {
