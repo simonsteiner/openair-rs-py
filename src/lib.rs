@@ -34,6 +34,8 @@ use lazy_static::lazy_static;
 use log::{debug, trace};
 use regex::Regex;
 
+const ALTITUDE_FLOAT_TOLERANCE: f64 = 1e-6;
+
 #[cfg(feature = "serde")]
 use serde::Serialize;
 
@@ -233,9 +235,9 @@ impl Altitude {
                     // Try to parse as float, then as int
                     if let Ok(val_f) = number.parse::<f64>() {
                         // Only allow conversion if the float is very close to a whole number
-                        if val_f.fract().abs() > 1e-6 {
-                            // Instead of error, return Ok with rounded value and log info
-                            log::info!(
+                        if val_f.fract().abs() > ALTITUDE_FLOAT_TOLERANCE {
+                            // Instead of error, return Ok with rounded value and log debug
+                            log::debug!(
                                 "Altitude value '{}' was rounded to nearest integer ({})",
                                 number,
                                 val_f.round() as i32
