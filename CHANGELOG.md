@@ -13,6 +13,18 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
+### v0.1.3 (2025-07-27)
+
+[added] Extended airspace class parsing with additional types and support for French classes
+[added] Support for 'Other' airspace class and French airspace classes in parser
+[added] Command-line interface (CLI) for parsing OpenAir files and outputting JSON
+[added] Validation for altitude input to prevent multiple decimal points
+[added] Unit test for parsing NOTAM reference class
+[changed] Enhanced altitude parsing: round near-integer float values, use constant for float tolerance, and log debug information
+[changed] Improved documentation links and wording in docs and comments
+[chore] Added Palz-Alsace-Open 2025 airspace file
+[chore] update cspell dictionary and configuration for improved spell checking
+
 ### v0.1.2 (2025-07-26)
 
 - [added] .isort.cfg for import sorting configuration
