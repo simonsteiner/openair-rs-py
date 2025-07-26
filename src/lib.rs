@@ -58,6 +58,8 @@ pub enum Class {
     /// Controlled Traffic Region
     #[cfg_attr(feature = "serde", serde(rename = "CTR"))]
     Ctr,
+    /// Other/unknown class
+    Other,
     /// Prohibited area
     Prohibited,
     /// Restricted area
@@ -124,6 +126,7 @@ impl Class {
             "F" => Ok(Self::F),
             "G" => Ok(Self::G),
             "CTR" => Ok(Self::Ctr),
+            "OTHER" => Ok(Self::Other),
             "P" => Ok(Self::Prohibited),
             "R" => Ok(Self::Restricted),
             "Q" => Ok(Self::Danger),
@@ -211,9 +214,9 @@ impl Altitude {
                 }
             }
             other => {
-                let is_digit = |c: &char| c.is_ascii_digit();
-                let number: String = other.chars().take_while(is_digit).collect();
-                let rest: String = other.chars().skip_while(is_digit).collect();
+                let is_digit_or_dot = |c: &char| c.is_ascii_digit() || *c == '.';
+                let number: String = other.chars().take_while(is_digit_or_dot).collect();
+                let rest: String = other.chars().skip_while(is_digit_or_dot).collect();
                 lazy_static! {
                     static ref RE_FT_AMSL: Regex = Regex::new(r"(?i)^ft(:? a?msl)?$").unwrap();
                     static ref RE_M_AMSL: Regex = Regex::new(r"(?i)^m(:?sl)?$").unwrap();
@@ -222,16 +225,20 @@ impl Altitude {
                     static ref RE_M_AGL: Regex =
                         Regex::new(r"(?i)^(:?m )?(:?agl|gnd|sfc)$").unwrap();
                 }
-                if let Ok(val) = number.parse::<i32>() {
-                    let trimmed = rest.trim();
-                    if RE_FT_AMSL.is_match(trimmed) {
-                        return Ok(Self::FeetAmsl(val));
-                    } else if RE_FT_AGL.is_match(trimmed) {
-                        return Ok(Self::FeetAgl(val));
-                    } else if RE_M_AMSL.is_match(trimmed) {
-                        return Ok(Self::FeetAmsl(Self::m2ft(val)?));
-                    } else if RE_M_AGL.is_match(trimmed) {
-                        return Ok(Self::FeetAgl(Self::m2ft(val)?));
+                if !number.is_empty() {
+                    // Try to parse as float, then as int
+                    if let Ok(val_f) = number.parse::<f64>() {
+                        let val = val_f.round() as i32;
+                        let trimmed = rest.trim();
+                        if RE_FT_AMSL.is_match(trimmed) {
+                            return Ok(Self::FeetAmsl(val));
+                        } else if RE_FT_AGL.is_match(trimmed) {
+                            return Ok(Self::FeetAgl(val));
+                        } else if RE_M_AMSL.is_match(trimmed) {
+                            return Ok(Self::FeetAmsl(Self::m2ft(val)?));
+                        } else if RE_M_AGL.is_match(trimmed) {
+                            return Ok(Self::FeetAgl(Self::m2ft(val)?));
+                        }
                     }
                 }
                 Ok(Self::Other(other.to_string()))
@@ -869,6 +876,14 @@ mod tests {
                 Altitude::parse("42 ft AMSL").unwrap(),
                 Altitude::FeetAmsl(42)
             );
+            // Extended: floats and meters
+            assert_eq!(Altitude::parse("4500.0FT AMSL").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(Altitude::parse("4500.0 ft AMSL").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(Altitude::parse("1371m").unwrap(), Altitude::FeetAmsl(4498));
+            assert_eq!(Altitude::parse("1371 msl").unwrap(), Altitude::FeetAmsl(4498));
+            assert_eq!(Altitude::parse("4500.0ft").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(Altitude::parse("4500.0 FT").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(Altitude::parse("0m").unwrap(), Altitude::FeetAmsl(0));
         }
 
         #[test]
@@ -878,6 +893,10 @@ mod tests {
             assert_eq!(Altitude::parse("42 ft GND").unwrap(), Altitude::FeetAgl(42));
             assert_eq!(Altitude::parse("42 GND").unwrap(), Altitude::FeetAgl(42));
             assert_eq!(Altitude::parse("42SFC").unwrap(), Altitude::FeetAgl(42));
+            // Extended: floats and meters
+            assert_eq!(Altitude::parse("500ft agl").unwrap(), Altitude::FeetAgl(500));
+            assert_eq!(Altitude::parse("500.0FT GND").unwrap(), Altitude::FeetAgl(500));
+            assert_eq!(Altitude::parse("500 m agl").unwrap(), Altitude::FeetAgl(1640));
         }
 
         #[test]
@@ -891,6 +910,22 @@ mod tests {
                 Altitude::parse("FL130").unwrap(),
                 Altitude::FlightLevel(130)
             );
+        }
+
+        #[test]
+        fn parse_unlimited_and_other() {
+            assert_eq!(Altitude::parse("UNLIM").unwrap(), Altitude::Unlimited);
+            assert_eq!(Altitude::parse("unlimited").unwrap(), Altitude::Unlimited);
+            assert!(matches!(Altitude::parse("foo"), Ok(Altitude::Other(_))));
+            assert!(matches!(Altitude::parse("123 bananas"), Ok(Altitude::Other(_))));
+        }
+
+        #[test]
+        fn parse_errors() {
+            // Should error for invalid FL
+            assert!(Altitude::parse("FLabc").is_err());
+            // Should error for out-of-bounds meters
+            assert!(Altitude::parse("654553016m").is_err());
         }
     }
 
@@ -1167,6 +1202,54 @@ mod tests {
                     }
                     // Check that there is at least one Arc segment
                     assert!(segments.iter().any(|seg| matches!(seg, PolygonSegment::Arc(_))));
+                }
+                _ => panic!("Expected polygon geometry"),
+            }
+        }
+
+        /// Test parsing of an airspace with class OTHER.
+        #[test]
+        fn parse_other_class() {
+            let mut airspace = indoc!(
+                "
+                AC OTHER
+                AY TRA
+                AN TRA 22C (MILOPS)
+                *AUID GUId=EPTR22C UId=400003114648138 Id=EPTR22C
+                *AAlt [\"SFC/4500.0FT AMSL\", \"0m/1371m\"]
+                *ADescr Current time:2025-04-08 14:50:07.707
+                AH 4500.0FT AMSL
+                AL SFC
+                DP 52:53:55 N 018:00:00 E
+                DP 52:55:41 N 018:14:53 E
+                DP 52:53:43 N 018:20:49 E
+                DP 52:53:02 N 018:17:28 E
+                DP 52:51:11 N 018:11:57 E
+                DP 52:47:18 N 018:12:17 E
+                DP 52:45:36 N 018:15:44 E
+                DP 52:38:50 N 018:11:00 E
+                DP 52:40:17 N 018:00:00 E
+                DP 52:53:55 N 018:00:00 E
+                "
+            )
+            .as_bytes();
+            let mut spaces = parse(&mut airspace).unwrap();
+            assert_eq!(spaces.len(), 1);
+            let space: Airspace = spaces.pop().unwrap();
+            assert_eq!(space.class, Class::Other);
+            assert_eq!(space.type_, Some("TRA".to_string()));
+            assert_eq!(space.name, "TRA 22C (MILOPS)");
+            assert_eq!(space.upper_bound, Altitude::FeetAmsl(4500));
+            assert_eq!(space.lower_bound, Altitude::Gnd);
+            match space.geom {
+                Geometry::Polygon { segments } => {
+                    assert_eq!(segments.len(), 10);
+                    if let (PolygonSegment::Point(first), PolygonSegment::Point(last)) =
+                        (&segments[0], &segments[segments.len() - 1])
+                    {
+                        assert!((first.lat - last.lat).abs() < 1e-8);
+                        assert!((first.lng - last.lng).abs() < 1e-8);
+                    }
                 }
                 _ => panic!("Expected polygon geometry"),
             }
