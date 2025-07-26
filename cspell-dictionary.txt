@@ -16,6 +16,7 @@ maturin
 MCCLEAN
 Minden
 musllinux
+oneline
 openair
 pyfunction
 pymodule
