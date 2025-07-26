@@ -1,7 +1,7 @@
 //! Simple line-based parser for airspace files in `OpenAir` format (used by
 //! flight instruments like Skytraxx and others).
 //!
-//! <http://www.winpilot.com/UsersGuide/UserAirspace.asp>
+//! <https://web.archive.org/web/20220703063934/http://www.winpilot.com/usersguide/userairspace.asp>
 //!
 //! If you want to use this library, you need the [`parse`](fn.parse.html)
 //! function as entry point.
@@ -11,7 +11,7 @@
 //!
 //! ## Implementation Notes
 //!
-//! Unfortunately the `OpenAir` format is really underspecified. Every device
+//! Unfortunately the `OpenAir` format is poorly specified. Every device
 //! uses varying conventions. For example, there is nothing we can use as clear
 //! delimiter for airspaces. Some files delimit airspaces with an empty line,
 //! some with a comment. But on the other hand, some files even place comments
