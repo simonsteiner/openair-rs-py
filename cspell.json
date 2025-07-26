@@ -1,18 +1,26 @@
 {
+    "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
     "version": "0.2",
-    "ignorePaths": ["example_data/**"],
     "dictionaryDefinitions": [
         {
             "name": "openair-rs-py",
             "path": "./cspell-dictionary.txt"
-        }
+        },
     ],
     "dictionaries": [
         "openair-rs-py",
         "python",
         "rust"
     ],
-    "words": [],
+    "ignorePaths": [
+        "example_data/**"
+    ],
     "ignoreWords": [],
-    "import": []
+    "import": [
+        "https://cdn.jsdelivr.net/npm/@cspell/dict-en_us/cspell-ext.json",
+        "https://cdn.jsdelivr.net/npm/@cspell/dict-en-gb/cspell-ext.json",
+        "https://cdn.jsdelivr.net/npm/@cspell/dict-fr-fr/cspell-ext.json",
+    ],
+    "language": "en, en_GB, en_US, fr, fr_FR",
+    "words": [],
 }
