@@ -13,6 +13,10 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
+### v0.1.4 (2025-07-27)
+
+[added] The Python package now includes a `py.typed` marker file, enabling PEP 561 type hint support for downstream users and static type checkers (e.g., mypy, Pyright).  
+
 ### v0.1.3 (2025-07-27)
 
 [added] Extended airspace class parsing with additional types and support for French classes

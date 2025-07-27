@@ -3,7 +3,6 @@
 ## Prerequisites
 
 Make sure you have the required tools installed: `pip install maturin twine`
-Set variables: `export VERSION=X.Y.Z`
 
 ## Update version numbers
 
@@ -26,6 +25,7 @@ maturin develop  # Install in current Python environment for testing
 ## Commit & tag
 
 ```bash
+export VERSION=X.Y.Z
 git commit -m "Release v${VERSION}"
 git tag v${VERSION} -m "Version ${VERSION}"
 ```
