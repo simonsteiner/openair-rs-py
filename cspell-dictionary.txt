@@ -1,5 +1,6 @@
 ACCSEC
 Activ
+addopts
 Adiz
 amsl
 Andagne
@@ -9,7 +10,9 @@ AUID
 Bargen
 Bazile
 BEALE
+bugbear
 buochs
+capsys
 cdylib
 centerpoint
 Danilo
@@ -57,11 +60,13 @@ pyfunction
 pymodule
 pythonize
 pyupgrade
+readouterr
 rlib
 sccache
 skytraxx
 SOMESPACE
 switzerland
+testpaths
 TIMSH
 TRAFR
 unlim

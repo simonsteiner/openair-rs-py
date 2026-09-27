@@ -41,12 +41,23 @@ dev = [
     "lefthook>=2.1.10",
     "maturin>=1.15.0",
     "mypy>=2.3.1",
+    "pytest>=9.1.1",
     "ruff>=0.16.3",
 ]
 
 [tool.maturin]
 features = ["pyo3/extension-module", "python"]
 python-source = "python"
+
+# Rebuild the extension on `uv sync`/`uv run` when the Rust side changes, not
+# only when pyproject.toml does.
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "Cargo.lock" },
+    { file = "src/**/*.rs" },
+]
 
 [tool.ruff]
 line-length = 88
@@ -66,9 +77,16 @@ convention = "google"
 [tool.ruff.lint.isort]
 known-first-party = ["openair"]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
 [tool.mypy]
 mypy_path = "python"
 warn_return_any = true
 warn_unused_configs = true
 check_untyped_defs = true
 
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests/python"]
