@@ -23,10 +23,13 @@ pre-commit:
       glob: "*.py"
       run: uv run mypy --explicit-package-bases {staged_files}
 
+    # Same pinned nightly as upstream's CI: .rustfmt.toml uses unstable
+    # import-grouping options that stable rustfmt ignores.
+    # One-time: rustup toolchain install nightly-2025-10-18 --component rustfmt
     rustfmt:
       priority: 4
       glob: "*.rs"
-      run: cargo fmt -- {staged_files}
+      run: cargo +nightly-2025-10-18 fmt -- {staged_files}
       stage_fixed: true
 
     # Whole crate rather than the staged files: clippy lints a crate, not a

@@ -1,22 +1,47 @@
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches: [master, main]
+
 name: CI
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-
-permissions:
-  contents: read
-
 jobs:
-  rust:
+  build_and_test:
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Run Rust tests
+      - name: Run check
+        run: cargo check --all-features
+      - name: Run tests (default features)
         run: cargo test
+      - name: Run tests (with serde)
+        run: cargo test --features serde
+      - name: Run example
+        run: cargo run --example parse_file example_data/Switzerland.txt
+
+  clippy:
+    name: Run clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup component add clippy
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+
+  rustfmt:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2025-10-18
+          components: rustfmt
+      - run: cargo +nightly-2025-10-18 fmt -- --check
 
   python:
+    name: Python wheel (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

@@ -1,8 +1,10 @@
+ACCSEC
 Activ
 Adiz
 amsl
 Andagne
 armv
+ASRA
 AUID
 Bargen
 Bazile
@@ -14,6 +16,7 @@ Danilo
 dbrgn
 Descr
 docstrings
+dtolnay
 EPTR
 errmsg
 FALLON
@@ -22,9 +25,13 @@ ffvl
 ffvp
 flyland
 fract
+france
+germany
 github
+GSEC
 gypaete
 indoc
+insta
 lefthook
 LFFFVL
 LFFFVPECHO
@@ -32,6 +39,7 @@ LFZSMDSTAC
 linux
 manylinux
 maturin
+MATZ
 MCCLEAN
 MILOPS
 Minden
@@ -50,6 +58,11 @@ rlib
 sccache
 skytraxx
 SOMESPACE
+switzerland
 TIMSH
+TRAFR
 unlim
 unltd
+unparseable
+VFRR
+VFRSEC

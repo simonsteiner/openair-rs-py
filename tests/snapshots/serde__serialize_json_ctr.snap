@@ -1,0 +1,20 @@
+---
+source: tests/serde.rs
+expression: airspace
+---
+{
+  "name": "Control Zone",
+  "class": "UNC",
+  "type": "CTR",
+  "lowerBound": {
+    "type": "Gnd"
+  },
+  "upperBound": {
+    "type": "FeetAgl",
+    "val": 1000
+  },
+  "geom": {
+    "type": "Polygon",
+    "segments": []
+  }
+}

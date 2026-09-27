@@ -1,0 +1,102 @@
+---
+source: tests/parser.rs
+expression: spaces.last().unwrap()
+---
+Airspace {
+    name: Some(
+        "LF-R17 E1 TEMPO ECKMUHL",
+    ),
+    class: Unclassified,
+    type_: Some(
+        RestrictedArea,
+    ),
+    lower_bound: Gnd,
+    upper_bound: FeetAmsl(
+        2500,
+    ),
+    geom: Polygon {
+        segments: [
+            Point(
+                Coord {
+                    lat: 47.93333333333333,
+                    lng: -4.433888888888889,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.93333333333333,
+                    lng: -5.25,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.6,
+                    lng: -4.5,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.55,
+                    lng: -4.25,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.5,
+                    lng: -4.176944444444445,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.69472222222222,
+                    lng: -4.176944444444445,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.77777777777778,
+                    lng: -4.339444444444444,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.77166666666667,
+                    lng: -4.355277777777777,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.77166666666667,
+                    lng: -4.384166666666667,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.82027777777778,
+                    lng: -4.407500000000001,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.8425,
+                    lng: -4.371944444444444,
+                },
+            ),
+            Point(
+                Coord {
+                    lat: 47.93333333333333,
+                    lng: -4.433888888888889,
+                },
+            ),
+        ],
+    },
+    frequency: None,
+    call_sign: None,
+    transponder_code: None,
+    activation_times: Some(
+        ActivationTimes {
+            start: None,
+            end: None,
+        },
+    ),
+}

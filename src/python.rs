@@ -1,13 +1,15 @@
 // Re-export the main parse function from the library
-pub use crate::parse;
-use pyo3::prelude::*;
 use std::io::BufReader;
+
+use pyo3::prelude::*;
+
+pub use crate::parse;
 
 /// Parse OpenAir airspace data from a string
 #[pyfunction]
 fn parse_openair_string(data: String) -> PyResult<String> {
     let mut reader = BufReader::new(data.as_bytes());
-    match parse(&mut reader) {
+    match parse(&mut reader).collect::<Result<Vec<_>, _>>() {
         Ok(airspaces) => {
             // Serialize to JSON for easy Python consumption
             #[cfg(feature = "serde")]
@@ -31,8 +33,7 @@ fn parse_openair_string(data: String) -> PyResult<String> {
 /// Parse OpenAir airspace data from a file path
 #[pyfunction]
 fn parse_openair_file(filepath: String) -> PyResult<String> {
-    use std::fs::File;
-    use std::io::BufReader;
+    use std::{fs::File, io::BufReader};
 
     let file = File::open(&filepath).map_err(|e| {
         PyErr::new::<pyo3::exceptions::PyIOError, _>(format!(
@@ -41,7 +42,7 @@ fn parse_openair_file(filepath: String) -> PyResult<String> {
     })?;
 
     let mut reader = BufReader::new(file);
-    match parse(&mut reader) {
+    match parse(&mut reader).collect::<Result<Vec<_>, _>>() {
         Ok(airspaces) => {
             // Serialize to JSON for easy Python consumption
             #[cfg(feature = "serde")]
