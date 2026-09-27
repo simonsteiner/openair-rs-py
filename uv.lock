@@ -345,7 +345,7 @@ wheels = [
 
 [[package]]
 name = "openair-rs-py"
-version = "0.1.4"
+version = "0.2.0"
 source = { editable = "." }
 
 [package.dev-dependencies]

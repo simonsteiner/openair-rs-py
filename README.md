@@ -1,8 +1,8 @@
 # openair-rs-py
 
-**Note:** _This is a fork of <https://github.com/dbrgn/openair-rs> with Python bindings. See [README_ORIG.md](./README_ORIG.md) for original readme._
+**Note:** _This is a fork of <https://github.com/glide-rs/openair-rs> (formerly dbrgn/openair-rs) with Python bindings. See [README_ORIG.md](./README_ORIG.md) for the upstream readme._
 
-This directory contains Python bindings for the OpenAir airspace file parser written in Rust.
+Python bindings for reading and writing OpenAir airspace files, backed by the Rust `openair` crate.
 
 ## Openair Format specification
 
@@ -10,18 +10,25 @@ This directory contains Python bindings for the OpenAir airspace file parser wri
 
 see also [FORMAT.txt](./FORMAT.txt)
 
-For future improvements (version 2.1), see: <https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md>
+OpenAir v2 (Naviter): <https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md>
 
 ## Features
 
-- Fast OpenAir file parsing using Rust
-- Python-friendly API returning standard Python dictionaries
-- Support for all OpenAir format features:
-  - Airspace metadata (name, class, bounds)
-  - Polygon points, circles, arcs
-  - Extension records (AY/AF/AG)
+- Fast OpenAir parsing and writing in Rust, returning plain Python dicts
+- Typed: `openair.types` describes the dicts as `TypedDict`s (PEP 561 `py.typed`)
+- OpenAir v2 `AC` classes and `AY` types; any other token (e.g. French `FFVL`,
+  `ZSM`, legacy `R`/`Q`/`CTR`) is kept verbatim
+- Extension records: `AY`, `AF`, `AG`, `AX`, `AA`
+- Polygons, circles and arcs; decimal altitudes such as `4500.0FT AMSL`
+- `openair` command-line tool that converts OpenAir to JSON
 
 ## Installation
+
+```bash
+pip install openair-rs-py
+```
+
+## Development
 
 ### Prerequisites
 
@@ -53,31 +60,45 @@ Use `maturin develop` for development - it compiles the Rust code and installs t
 ## Usage
 
 ```python
-from openair import parse_string, parse_file
+import openair
 
-# Parse from string
-openair_data = """
-AC D
-AN EXAMPLE CTR
-AL GND
-AH 5000 ft
-DP 46:57:13 N 008:27:52 E
-DP 46:57:46 N 008:30:41 E
-"""
+# Parse from a string or a file (str or pathlib.Path)
+airspaces = openair.parse_string(openair_data)
+airspaces = openair.parse_file("path/to/airspace.txt")
 
-airspaces = parse_string(openair_data)
-
-# Parse from file
-airspaces = parse_file("path/to/airspace.txt")
-
-# Each airspace is a dictionary with structure:
 for airspace in airspaces:
-    print(f"Name: {airspace['name']}")
-    print(f"Class: {airspace['class']}")
-    print(f"Lower bound: {airspace['lowerBound']}")
-    print(f"Upper bound: {airspace['upperBound']}")
-    print(f"Geometry: {airspace['geom']}")
+    print(airspace["name"], airspace["class"], airspace.get("type"))
+    print(airspace["lowerBound"], airspace["upperBound"], airspace["geom"]["type"])
+
+# Move legacy AC tokens (R, Q, P, CTR, GP, W, RMZ, TMZ) into AY and set class UNC
+airspaces = openair.parse_file("path/to/airspace.txt", normalize_legacy_classes=True)
+
+# Write OpenAir again (to a string or a file)
+text = openair.write_string(airspaces)
+openair.write_file(airspaces, "out.txt")
 ```
+
+Parse errors raise `ValueError`, unreadable files raise `OSError`.
+
+For type checking, annotate with `openair.Airspace` (or the other types in `openair.types`).
+
+### Command line
+
+```bash
+openair example_data/Switzerland.txt --pretty -o switzerland.json
+python -m openair example_data/Switzerland.txt
+```
+
+### Migrating from 0.1.x
+
+- `class` is now the raw `AC` token: `"R"`, `"Q"`, `"P"`, `"CTR"`, `"FFVL"`, …
+  (0.1.x returned names like `"Restricted"`, `"Danger"`, `"Ffvl"`). Pass
+  `normalize_legacy_classes=True` to get OpenAir v2 style `class: "UNC"` plus `type`.
+- `name` may be `None`; `frequency`, `callSign`, `transponderCode` and
+  `activationTimes` appear when present.
+- Malformed altitudes such as `4500.0.5FT` no longer raise; they come back as
+  `{"type": "Other", "val": "4500.0.5FT"}`.
+- `OpenAirParser` is deprecated; use the module-level functions.
 
 ## Example Output
 

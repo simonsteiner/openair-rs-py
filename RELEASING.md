@@ -59,7 +59,7 @@ Upload to PyPI: `uv run maturin publish`
 
 - The Python package name will be `openair-rs-py` as defined in `pyproject.toml`
 - GitHub Actions automatically builds wheels for multiple platforms and Python versions
-- Make sure you have set the `PYPI_API_TOKEN` secret in your GitHub repository settings
+- Publishing uses PyPI [trusted publishing](https://docs.pypi.org/trusted-publishers/): on pypi.org, add a GitHub publisher for `simonsteiner/openair-rs-py`, workflow `publish.yml`, environment `pypi`. No API token secret is needed
 - The workflow builds for Linux (x86_64, x86, aarch64, armv7, s390x, ppc64le), Windows (x64, x86), and macOS (x86_64, aarch64)
 - This process only publishes to PyPI (not crates.io) since this is a fork focused on Python usage
 - Publishing is triggered automatically when you push a version tag (e.g., `v1.0.0`)

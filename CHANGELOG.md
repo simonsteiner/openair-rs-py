@@ -13,18 +13,29 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
-### Unreleased
+### v0.2.0 (unreleased)
 
+Rust core synced with upstream glide-rs/openair-rs v0.6.0.
+
+[changed] **Breaking:** airspace dicts follow upstream v0.6.0. `class` is the raw `AC` token (`"R"`, `"Q"`, `"CTR"`, `"FFVL"`, ...) instead of names like `"Restricted"`; `type` is the raw `AY` token; `name` may be `None`; `frequency`, `callSign`, `transponderCode` and `activationTimes` appear when present. See "Migrating from 0.1.x" in the README
+[changed] **Breaking:** malformed decimal altitudes (e.g. `4500.0.5FT`) are returned as `Other` instead of failing the whole parse
+[added] `write_string()` / `write_file()` to write OpenAir, using upstream's writer
+[added] `normalize_legacy_classes=True` for `parse_string()` / `parse_file()` (upstream `Airspace::normalize_legacy_class()`)
+[added] `openair.types` TypedDicts describing the airspace dicts; typed stub for the compiled module
+[added] `openair` console script and `python -m openair` (the CLI was previously not shipped in the wheel), with `--normalize-legacy-classes` and `--version`
+[added] `openair.__version__`
 [added] Python 3.14 wheels
-[added] CI workflow running Rust tests and wheel smoke tests (Python 3.10 and 3.14 on Linux, macOS, Windows)
-[added] README is now used as the PyPI project description
-[changed] Upgraded PyO3 from 0.25 to 0.29 and refreshed `Cargo.lock` dependencies
-[changed] License metadata uses a PEP 639 SPDX expression (`MIT OR Apache-2.0`)
-[changed] Publish workflow: updated GitHub Actions, replaced retired `macos-13` runner with `macos-15-intel`, install all target Pythons on Windows/macOS
-[changed] Dev tooling: pre-commit replaced by lefthook (`uv run lefthook install`); black, isort, flake8 and pydocstyle replaced by ruff; mypy config moved into `pyproject.toml`; Rust hooks for rustfmt and clippy
-[changed] Dev dependencies are a uv dependency group (`uv sync`) instead of the `dev` extra; `uv.lock` is committed
-[changed] Rust sources formatted with rustfmt and clippy-clean
+[added] pytest suite, and CI running Rust tests, clippy, rustfmt, Python lint and the pytest suite against built wheels on Linux, macOS and Windows
+[changed] Parsing returns Python objects directly (no JSON string round-trip) and releases the GIL; the module is marked free-threading safe
+[changed] Upgraded PyO3 from 0.25 to 0.29
+[changed] License metadata uses a PEP 639 SPDX expression (`MIT OR Apache-2.0`); README is the PyPI description
+[changed] Publishing uses PyPI trusted publishing instead of an API token; updated GitHub Actions and replaced the retired `macos-13` runner
+[changed] Dev tooling: lefthook (`uv run lefthook install`) replaces pre-commit; ruff replaces black, isort, flake8 and pydocstyle; dev dependencies are a uv dependency group; `uv.lock` and `Cargo.lock` are committed; Dependabot for GitHub Actions and uv
+[deprecated] `OpenAirParser`; use the module-level functions
+[removed] `parse_openair_string()` / `parse_openair_file()` (JSON string functions)
 [removed] Support for Python 3.8 and 3.9 (end-of-life); `requires-python` is now `>=3.10`
+[fixed] Airspaces whose header records are interleaved with `SP`/`SB`/`AT` display records (e.g. `pao2025.txt`) no longer fail with "Missing lower bound" (regression in upstream's header-based separation)
+[fixed] Decimal altitudes (`4500.0FT AMSL`, `1371.6m`) re-applied on top of upstream's new altitude parser; decimal meters are converted before rounding
 
 ### v0.1.4 (2025-07-27)
 

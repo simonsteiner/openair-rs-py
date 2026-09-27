@@ -49,6 +49,7 @@ MILOPS
 Minden
 mundolsheim
 musllinux
+Naviter
 NOFIR
 notam
 notamref
@@ -58,11 +59,13 @@ ouavant
 Palz
 pyfunction
 pymodule
+pypa
 pythonize
 pyupgrade
 readouterr
 rlib
 sccache
+simonsteiner
 skytraxx
 SOMESPACE
 switzerland
