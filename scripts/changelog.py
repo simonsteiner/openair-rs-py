@@ -24,7 +24,10 @@ UNRELEASED = "### Unreleased"
 
 def _bindings(lines: list[str]) -> tuple[int, int]:
     """Return the line range of the Python bindings section."""
-    start = lines.index(SECTION)
+    try:
+        start = lines.index(SECTION)
+    except ValueError:
+        sys.exit(f"CHANGELOG.md has no '{SECTION}' section.")
     end = next(
         (i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")),
         len(lines),
