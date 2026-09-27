@@ -11,7 +11,7 @@ Update version in `pyproject.toml`
 ## Update changelog
 
 Update changelog in `CHANGELOG.md`
-To see changes since the last release, run: `git log --oneline v0.1.1..HEAD`
+To see changes since the last release, run: `git log --oneline v0.1.4..HEAD`
 
 ## Build and test locally
 
@@ -50,7 +50,7 @@ If you need to publish manually, you can use maturin directly:
 Build wheels for multiple platforms:
 
 ```bash
-maturin build --release --interpreter python3.8 python3.9 python3.10 python3.11 python3.12
+maturin build --release --interpreter python3.10 python3.11 python3.12 python3.13 python3.14
 ```
 
 Upload to PyPI: `maturin publish`

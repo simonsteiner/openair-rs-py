@@ -13,6 +13,17 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
+### Unreleased
+
+[added] Python 3.14 wheels
+[added] CI workflow running Rust tests and wheel smoke tests (Python 3.10 and 3.14 on Linux, macOS, Windows)
+[added] README is now used as the PyPI project description
+[changed] Upgraded PyO3 from 0.25 to 0.29 and refreshed `Cargo.lock` dependencies
+[changed] License metadata uses a PEP 639 SPDX expression (`MIT OR Apache-2.0`)
+[changed] Publish workflow: updated GitHub Actions, replaced retired `macos-13` runner with `macos-15-intel`, install all target Pythons on Windows/macOS
+[changed] Updated dev dependencies and pre-commit hooks
+[removed] Support for Python 3.8 and 3.9 (end-of-life); `requires-python` is now `>=3.10`
+
 ### v0.1.4 (2025-07-27)
 
 [added] The Python package now includes a `py.typed` marker file, enabling PEP 561 type hint support for downstream users and static type checkers (e.g., mypy, Pyright).  

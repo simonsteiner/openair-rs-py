@@ -26,7 +26,7 @@ For future improvements (version 2.1), see: <https://github.com/naviter/seeyou_f
 ### Prerequisites
 
 1. **Rust toolchain**: Install from [rustup.rs](https://rustup.rs/)
-2. **Python 3.8+**
+2. **Python 3.10+**
 3. **Maturin**: Install with `pip install maturin`
 
 ### Building and Installation
