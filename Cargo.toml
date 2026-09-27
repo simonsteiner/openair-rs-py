@@ -21,18 +21,18 @@ harness = false
 
 [features]
 serde = ["dep:serde", "iso8601/serde"]
-python = ["dep:pyo3", "serde", "dep:serde_json"]
+python = ["dep:pyo3", "dep:pythonize", "serde"]
 
 [dependencies]
 iso8601 = "0.6"
 log = "0.4"
 serde = { version = "1", optional = true, features = ["derive"] }
-serde_json = { version = "1", optional = true }
 pyo3 = { version = "0.29", features = ["extension-module"], optional = true }
+pythonize = { version = "0.29", optional = true }
 
 [dev-dependencies]
 criterion = "0.7"
 env_logger = "0.11"
-serde_json = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }
 indoc = "2"
 insta = { version = "1", features = ["json"] }

@@ -2,7 +2,7 @@ use std::io::Write;
 
 /// A coordinate pair (WGS84).
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Coord {
     pub lat: f64,
     pub lng: f64,

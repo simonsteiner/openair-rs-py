@@ -58,3 +58,29 @@ fn serialize_json_ctr() {
     };
     assert_json_snapshot!(airspace);
 }
+
+#[test]
+fn json_roundtrip_fixtures() {
+    for fixture in [
+        "example_data/Switzerland.txt",
+        "example_data/Germany.txt",
+        "example_data/Germany_Border.txt",
+        "example_data/France.txt",
+    ] {
+        let data = std::fs::read(fixture).unwrap();
+        let airspaces = openair::parse(data.as_slice())
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        let json = serde_json::to_string(&airspaces).unwrap();
+        let back: Vec<openair::Airspace> = serde_json::from_str(&json).unwrap();
+        assert_eq!(back, airspaces, "{fixture}");
+    }
+}
+
+#[test]
+fn deserialize_rejects_empty_class() {
+    let json = r#"{"name":null,"class":"","lowerBound":{"type":"Gnd"},
+        "upperBound":{"type":"Gnd"},"geom":{"type":"Polygon","segments":[]}}"#;
+    let err = serde_json::from_str::<openair::Airspace>(json).unwrap_err();
+    assert!(err.to_string().contains("Airspace class is empty"), "{err}");
+}

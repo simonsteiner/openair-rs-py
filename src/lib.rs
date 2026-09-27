@@ -79,7 +79,7 @@ use std::{
 
 use log::debug;
 #[cfg(feature = "serde")]
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::record::Record;
 pub use crate::{
@@ -96,7 +96,7 @@ const FALLBACK_NAME: &str = "<unnamed>";
 
 /// An airspace.
 #[derive(Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Airspace {
     /// The name / description of the airspace

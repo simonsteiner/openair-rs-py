@@ -4,7 +4,7 @@ use crate::Coord;
 
 /// Arc direction, either clockwise or counterclockwise.
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
 pub enum Direction {
     /// Clockwise.
@@ -31,7 +31,7 @@ impl Direction {
 
 /// An arc segment (DA record).
 #[derive(Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct ArcSegment {
     pub centerpoint: Coord,
@@ -43,7 +43,7 @@ pub struct ArcSegment {
 
 /// An arc (DB record).
 #[derive(Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Arc {
     pub centerpoint: Coord,
     pub start: Coord,
@@ -53,7 +53,7 @@ pub struct Arc {
 
 /// A polygon segment.
 #[derive(Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(tag = "type"))]
 pub enum PolygonSegment {
     Point(Coord),
@@ -62,7 +62,7 @@ pub enum PolygonSegment {
 }
 
 #[derive(Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(tag = "type"))]
 pub enum Geometry {
     Polygon {

@@ -24,6 +24,17 @@ pub enum Class {
 }
 
 #[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Class {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let token = <std::borrow::Cow<'de, str>>::deserialize(deserializer)?;
+        Self::parse(&token).map_err(serde::de::Error::custom)
+    }
+}
+
+#[cfg(feature = "serde")]
 impl serde::Serialize for Class {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

@@ -1,7 +1,7 @@
 use std::{io::Write, str::FromStr};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ActivationTimes {
     /// The activation start time, or `None` when no start is specified.
     pub start: Option<iso8601::DateTime>,

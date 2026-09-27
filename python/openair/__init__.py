@@ -1,82 +1,56 @@
-"""Python bindings for OpenAir airspace file parser.
+"""Read and write airspace files in OpenAir format.
 
-This module provides a Python interface to the Rust-based OpenAir parser.
+Parsing and writing are done by the Rust `openair` crate. Airspaces are plain
+dicts; see `openair.types` for their shape.
+
+Example:
+    >>> import openair
+    >>> airspaces = openair.parse_file("airspace.txt")  # doctest: +SKIP
+    >>> openair.write_file(airspaces, "copy.txt")  # doctest: +SKIP
 """
 
-import json
-from pathlib import Path
-from typing import Any, Dict, List, Union
+import warnings
+from importlib.metadata import PackageNotFoundError, version
+
+from openair.openair import parse_file, parse_string, write_file, write_string
+from openair.types import Airspace
 
 try:
-    # The compiled Rust extension; its types come from __init__.pyi.
-    from .openair import (  # type: ignore[import-not-found]
-        parse_openair_file,
-        parse_openair_string,
-    )
-except ImportError:
-    # Fallback for development - the Rust module needs to be built
-    def parse_openair_string(data: str) -> str:
-        raise ImportError(
-            "OpenAir Rust module not built. Run 'maturin develop' to build it."
-        )
-
-    def parse_openair_file(filepath: str) -> str:
-        raise ImportError(
-            "OpenAir Rust module not built. Run 'maturin develop' to build it."
-        )
+    __version__ = version("openair-rs-py")
+except PackageNotFoundError:  # pragma: no cover - running from a source tree
+    __version__ = "0+unknown"
 
 
 class OpenAirParser:
-    """A Python wrapper for the OpenAir airspace file parser.
-
-    This parser can handle airspace files in OpenAir format, which is used
-    by various flight instruments and aviation software.
-    """
+    """Deprecated: use the module-level `parse_file` and `parse_string`."""
 
     @staticmethod
-    def parse_string(data: str) -> List[Dict[str, Any]]:
-        """Parse OpenAir airspace data from a string.
-
-        Args:
-            data: OpenAir format string to parse
-
-        Returns:
-            List of airspace dictionaries
-
-        Raises:
-            ValueError: If the data cannot be parsed
-        """
-        json_result = parse_openair_string(data)
-        return json.loads(json_result)  # type: ignore[no-any-return]
+    def parse_string(data: str) -> list[Airspace]:
+        """Parse OpenAir data from a string (deprecated)."""
+        warnings.warn(
+            "OpenAirParser is deprecated; use openair.parse_string",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return parse_string(data)
 
     @staticmethod
-    def parse_file(filepath: Union[str, Path]) -> List[Dict[str, Any]]:
-        """Parse OpenAir airspace data from a file.
-
-        Args:
-            filepath: Path to the OpenAir file to parse
-
-        Returns:
-            List of airspace dictionaries
-
-        Raises:
-            ValueError: If the file cannot be parsed
-            IOError: If the file cannot be read
-        """
-        filepath_str = str(filepath)
-        json_result = parse_openair_file(filepath_str)
-        return json.loads(json_result)  # type: ignore[no-any-return]
+    def parse_file(filepath: str) -> list[Airspace]:
+        """Parse OpenAir data from a file (deprecated)."""
+        warnings.warn(
+            "OpenAirParser is deprecated; use openair.parse_file",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return parse_file(filepath)
 
 
-# Convenience functions for direct usage
-def parse_string(data: str) -> List[Dict[str, Any]]:
-    """Parse OpenAir data from string. Convenience function."""
-    return OpenAirParser.parse_string(data)
-
-
-def parse_file(filepath: Union[str, Path]) -> List[Dict[str, Any]]:
-    """Parse OpenAir data from file. Convenience function."""
-    return OpenAirParser.parse_file(filepath)
-
-
-__all__ = ["OpenAirParser", "parse_string", "parse_file"]
+__all__ = [
+    "Airspace",
+    "OpenAirParser",
+    "__version__",
+    "parse_file",
+    "parse_string",
+    "write_file",
+    "write_string",
+]

@@ -14,6 +14,7 @@ cdylib
 centerpoint
 Danilo
 dbrgn
+depythonize
 Descr
 docstrings
 dtolnay
@@ -54,6 +55,8 @@ ouavant
 Palz
 pyfunction
 pymodule
+pythonize
+pyupgrade
 rlib
 sccache
 skytraxx
@@ -63,6 +66,7 @@ TIMSH
 TRAFR
 unlim
 unltd
+unparsable
 unparseable
 VFRR
 VFRSEC

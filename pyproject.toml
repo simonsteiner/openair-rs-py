@@ -28,6 +28,14 @@ classifiers = [
 ]
 dynamic = []
 
+[project.scripts]
+openair = "openair.cli:main"
+
+[project.urls]
+Repository = "https://github.com/simonsteiner/openair-rs-py"
+Changelog = "https://github.com/simonsteiner/openair-rs-py/blob/main/CHANGELOG.md"
+Upstream = "https://github.com/glide-rs/openair-rs"
+
 [dependency-groups]
 dev = [
     "lefthook>=2.1.10",
@@ -46,9 +54,10 @@ target-version = "py310"
 src = ["python"]
 
 [tool.ruff.lint]
-# E/W pycodestyle, F pyflakes, I import sorting, D docstrings.
+# E/W pycodestyle, F pyflakes, I import sorting, D docstrings,
+# UP pyupgrade (modern syntax for target-version), B bugbear.
 # E501 (line length) and E203 are left to the formatter.
-select = ["E", "W", "F", "I", "D"]
+select = ["E", "W", "F", "I", "D", "UP", "B"]
 ignore = ["E501", "E203"]
 
 [tool.ruff.lint.pydocstyle]

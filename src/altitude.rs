@@ -2,7 +2,7 @@ use std::{fmt, io::Write};
 
 /// Altitude, either ground or a certain height AMSL in feet.
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(tag = "type", content = "val"))]
 pub enum Altitude {
     /// Ground/surface level
