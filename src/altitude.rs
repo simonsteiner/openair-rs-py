@@ -53,6 +53,67 @@ fn is_agl_suffix(s: &str) -> bool {
     s.eq_ignore_ascii_case("agl") || s.eq_ignore_ascii_case("gnd") || s.eq_ignore_ascii_case("sfc")
 }
 
+/// Length of the leading number in `s`: digits, optionally followed by a
+/// decimal point and more digits (e.g. `4500` or `4500.0`).
+fn numeric_prefix_len(s: &str) -> usize {
+    let digits = |s: &str| s.find(|c: char| !c.is_ascii_digit()).unwrap_or(s.len());
+    let int_len = digits(s);
+    if int_len > 0
+        && let Some(after_dot) = s[int_len..].strip_prefix('.')
+    {
+        let frac_len = digits(after_dot);
+        if frac_len > 0 {
+            return int_len + 1 + frac_len;
+        }
+    }
+    int_len
+}
+
+/// Numeric part of an altitude.
+///
+/// Some sources (e.g. the French FFVL/FFVP files) write decimal altitudes like
+/// `4500.0FT AMSL`. Those are rounded to whole feet; whole numbers keep the
+/// exact integer path.
+#[derive(Clone, Copy)]
+enum Number {
+    Int(i32),
+    Decimal(f64),
+}
+
+impl Number {
+    fn parse(number: &str) -> Option<Self> {
+        if number.contains('.') {
+            number.parse().ok().map(Self::Decimal)
+        } else {
+            number.parse().ok().map(Self::Int)
+        }
+    }
+
+    /// The value as whole feet.
+    fn feet(self) -> Result<i32, &'static str> {
+        match self {
+            Self::Int(val) => Ok(val),
+            Self::Decimal(val) => round_to_i32(val),
+        }
+    }
+
+    /// The value converted from meters to whole feet.
+    fn meters_to_feet(self) -> Result<i32, &'static str> {
+        match self {
+            Self::Int(val) => Altitude::m2ft(val),
+            Self::Decimal(val) => round_to_i32(val / 0.3048),
+        }
+    }
+}
+
+fn round_to_i32(val: f64) -> Result<i32, &'static str> {
+    let rounded = val.round();
+    if rounded > f64::from(i32::MAX) {
+        return Err("altitude out of bounds (too large)");
+    }
+    Ok(rounded as i32)
+}
+
 impl Altitude {
     /// Writes the altitude in OpenAir format.
     pub fn write<W: Write>(&self, mut writer: W) -> std::io::Result<()> {
@@ -101,16 +162,13 @@ impl Altitude {
         }
 
         // Try to parse numeric altitude
-        // Find where digits end to split number from unit/reference suffix
-        let pos = data
-            .find(|c: char| !c.is_ascii_digit())
-            .unwrap_or(data.len());
+        // Find where the number ends to split it from the unit/reference suffix
+        let (number, rest) = data.split_at(numeric_prefix_len(data));
 
-        let (number, rest) = data.split_at(pos);
-
-        let Ok(mut val) = number.parse::<i32>() else {
+        let Some(number) = Number::parse(number) else {
             return Ok(Self::Other(data.to_string()));
         };
+        let mut val = number.feet()?;
 
         let rest = rest.trim();
 
@@ -130,7 +188,7 @@ impl Altitude {
 
         // Convert meters to feet or ensure the unit is "ft"
         if eq(unit, "m") {
-            val = Self::m2ft(val)?;
+            val = number.meters_to_feet()?;
         } else if !eq(unit, "ft") {
             // Unknown unit - can't parse
             return Ok(Self::Other(data.to_string()));
@@ -313,6 +371,63 @@ mod tests {
             Altitude::parse("1000 AgL").unwrap(),
             Altitude::FeetAgl(1000)
         );
+    }
+
+    #[test]
+    fn parse_decimal() {
+        assert_eq!(
+            Altitude::parse("4500.0FT AMSL").unwrap(),
+            Altitude::FeetAmsl(4500)
+        );
+        assert_eq!(
+            Altitude::parse("4500.0 ft AMSL").unwrap(),
+            Altitude::FeetAmsl(4500)
+        );
+        assert_eq!(
+            Altitude::parse("4500.0ft").unwrap(),
+            Altitude::FeetAmsl(4500)
+        );
+        assert_eq!(
+            Altitude::parse("500.0FT GND").unwrap(),
+            Altitude::FeetAgl(500)
+        );
+        assert_eq!(
+            Altitude::parse("500.49 ft agl").unwrap(),
+            Altitude::FeetAgl(500)
+        );
+        assert_eq!(
+            Altitude::parse("500.51 ft agl").unwrap(),
+            Altitude::FeetAgl(501)
+        );
+        assert_eq!(
+            Altitude::parse("999.999 ft agl").unwrap(),
+            Altitude::FeetAgl(1000)
+        );
+        assert_eq!(
+            Altitude::parse("1234.5 MSL").unwrap(),
+            Altitude::FeetAmsl(1235)
+        );
+        // Meters are converted before rounding: 1371.6 m = 4500 ft
+        assert_eq!(
+            Altitude::parse("1371.6m").unwrap(),
+            Altitude::FeetAmsl(4500)
+        );
+        assert_eq!(
+            Altitude::parse("152.4 m AGL").unwrap(),
+            Altitude::FeetAgl(500)
+        );
+        assert!(Altitude::parse("9999999999.5 ft").is_err());
+    }
+
+    #[test]
+    fn parse_malformed_decimal() {
+        for input in ["4500.0.5FT", "123..45 ft", "..123 ft", ".5 ft", "4500. ft"] {
+            assert_eq!(
+                Altitude::parse(input).unwrap(),
+                Altitude::Other(input.to_string()),
+                "{input}"
+            );
+        }
     }
 
     #[test]
