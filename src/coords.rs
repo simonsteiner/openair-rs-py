@@ -63,8 +63,10 @@ fn parse_coord_component(input: &str, is_lat: bool) -> Result<(f64, &str), ()> {
     // Parse degrees
     let pos = input.find(|c: char| !c.is_ascii_digit()).ok_or(())?;
 
-    let max_digits = if is_lat { 2 } else { 3 };
-    if pos > max_digits {
+    // Three digits for latitude too: producers pad it to longitude's width
+    // (`004:45:57 N 076:00:46 W`), and the range check below still rejects
+    // anything above 90.
+    if pos > 3 {
         return Err(());
     }
 
@@ -215,8 +217,16 @@ mod tests {
 
     #[test]
     fn parse_digit_count_limits() {
-        // 3-digit latitude degrees should fail
+        // 3-digit latitude degrees out of range should fail
         assert_compact_debug_snapshot!(Coord::parse("123:00:00 N 000:00:00 E"), @r#"Err("Invalid coord: \"123:00:00 N 000:00:00 E\"")"#);
+
+        // 3-digit latitude degrees padded with zeros parse
+        assert_compact_debug_snapshot!(Coord::parse("004:45:57.000 N 076:00:46.000 W"), @"Ok(Coord { lat: 4.765833333333333, lng: -76.01277777777777 })");
+        assert_compact_debug_snapshot!(Coord::parse("090:00:00 N 000:00:00 E"), @"Ok(Coord { lat: 90.0, lng: 0.0 })");
+
+        // 4-digit degrees should fail
+        assert_compact_debug_snapshot!(Coord::parse("0004:00:00 N 000:00:00 E"), @r#"Err("Invalid coord: \"0004:00:00 N 000:00:00 E\"")"#);
+        assert_compact_debug_snapshot!(Coord::parse("00:00:00 N 0004:00:00 E"), @r#"Err("Invalid coord: \"00:00:00 N 0004:00:00 E\"")"#);
 
         // 3-digit minutes should fail
         assert_compact_debug_snapshot!(Coord::parse("45:123:00 N 000:00:00 E"), @r#"Err("Invalid coord: \"45:123:00 N 000:00:00 E\"")"#);

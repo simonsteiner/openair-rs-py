@@ -85,6 +85,12 @@ class TestParse:
         assert airspace["type"] == "PROTECT"
         assert airspace["geom"]["type"] == "Circle"
 
+    def test_latitude_padded_to_three_digits(self) -> None:
+        """Some producers pad latitude degrees like longitude's (`004:45:57 N`)."""
+        data = CTR.replace("DP 46:57:13 N", "DP 046:57:13 N")
+        [airspace] = openair.parse_string(data)
+        assert airspace == openair.parse_string(CTR)[0]
+
     def test_missing_name_is_none(self) -> None:
         [airspace] = openair.parse_string(CTR.replace("AN EXAMPLE CTR\n", ""))
         assert airspace["name"] is None
