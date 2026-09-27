@@ -57,7 +57,7 @@ use std::fs::File;
 use openair::{Airspace, Altitude, Class, Coord, Geometry};
 
 let airspace = Airspace {
-    name: "Example Zone".to_string(),
+    name: Some("Example Zone".to_string()),
     class: Class::D,
     type_: None,
     lower_bound: Altitude::Gnd,

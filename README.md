@@ -62,6 +62,16 @@ Use `maturin develop` for development - it compiles the Rust code and installs t
 ```python
 import openair
 
+openair_data = """
+AC D
+AN EXAMPLE CTR
+AL GND
+AH 5000 ft
+DP 46:57:13 N 008:27:52 E
+DP 46:57:46 N 008:30:41 E
+DP 46:57:55 N 008:28:40 E
+"""
+
 # Parse from a string or a file (str or pathlib.Path)
 airspaces = openair.parse_string(openair_data)
 airspaces = openair.parse_file("path/to/airspace.txt")
