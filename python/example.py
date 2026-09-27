@@ -24,7 +24,7 @@ def main():
 
         print(f"Parsed {len(airspaces)} airspace(s) from string:")
         for i, airspace in enumerate(airspaces):
-            print(f"  {i+1}. {airspace['name']} (Class {airspace['class']})")
+            print(f"  {i + 1}. {airspace['name']} (Class {airspace['class']})")
             print(f"     Lower bound: {airspace['lowerBound']}")
             print(f"     Upper bound: {airspace['upperBound']}")
             print(f"     Geometry: {airspace['geom']['type']}")

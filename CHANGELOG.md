@@ -21,7 +21,9 @@ Possible log types:
 [changed] Upgraded PyO3 from 0.25 to 0.29 and refreshed `Cargo.lock` dependencies
 [changed] License metadata uses a PEP 639 SPDX expression (`MIT OR Apache-2.0`)
 [changed] Publish workflow: updated GitHub Actions, replaced retired `macos-13` runner with `macos-15-intel`, install all target Pythons on Windows/macOS
-[changed] Updated dev dependencies and pre-commit hooks
+[changed] Dev tooling: pre-commit replaced by lefthook (`uv run lefthook install`); black, isort, flake8 and pydocstyle replaced by ruff; mypy config moved into `pyproject.toml`; Rust hooks for rustfmt and clippy
+[changed] Dev dependencies are a uv dependency group (`uv sync`) instead of the `dev` extra; `uv.lock` is committed
+[changed] Rust sources formatted with rustfmt and clippy-clean
 [removed] Support for Python 3.8 and 3.9 (end-of-life); `requires-python` is now `>=3.10`
 
 ### v0.1.4 (2025-07-27)

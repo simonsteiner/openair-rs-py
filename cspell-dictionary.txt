@@ -13,6 +13,7 @@ centerpoint
 Danilo
 dbrgn
 Descr
+docstrings
 EPTR
 errmsg
 FALLON
@@ -24,6 +25,7 @@ fract
 github
 gypaete
 indoc
+lefthook
 LFFFVL
 LFFFVPECHO
 LFZSMDSTAC

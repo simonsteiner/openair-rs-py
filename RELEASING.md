@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Make sure you have the required tools installed: `pip install maturin twine`
+Install the dev dependencies (includes maturin): `uv sync`
 
 ## Update version numbers
 
@@ -18,8 +18,8 @@ To see changes since the last release, run: `git log --oneline v0.1.4..HEAD`
 Build the Python package locally to test:
 
 ```bash
-maturin build --release
-maturin develop  # Install in current Python environment for testing
+uv run maturin build --release
+uv run maturin develop  # Install into .venv for testing
 ```
 
 ## Commit & tag
@@ -50,11 +50,10 @@ If you need to publish manually, you can use maturin directly:
 Build wheels for multiple platforms:
 
 ```bash
-maturin build --release --interpreter python3.10 python3.11 python3.12 python3.13 python3.14
+uv run maturin build --release --interpreter python3.10 python3.11 python3.12 python3.13 python3.14
 ```
 
-Upload to PyPI: `maturin publish`
-or manually upload with twine: `twine upload target/wheels/*.whl`
+Upload to PyPI: `uv run maturin publish`
 
 ## Notes
 

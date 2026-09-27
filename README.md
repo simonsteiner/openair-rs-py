@@ -27,33 +27,25 @@ For future improvements (version 2.1), see: <https://github.com/naviter/seeyou_f
 
 1. **Rust toolchain**: Install from [rustup.rs](https://rustup.rs/)
 2. **Python 3.10+**
-3. **Maturin**: Install with `pip install maturin`
+3. **uv**: Install from [docs.astral.sh/uv](https://docs.astral.sh/uv/)
 
 ### Building and Installation
 
-#### Setup Virtual Environment (Recommended)
+#### Setup Development Environment
 
 ```bash
-# Create and activate a virtual environment
-python3 -m venv .venv
-# (Optional) If Python 3.13 is installed, create virtual environment with:
-python3.13 -m venv .venv
-source .venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies (inside the virtual environment)
-pip install --upgrade pip
-# Install the package in editable mode with all development dependencies
-pip install -e ".[dev]"
+# Create .venv, install the dev dependencies and build the package into it
+uv sync
 ```
 
 #### Build Commands
 
 ```bash
-# Development build with debug symbols (installs directly into current environment)
-maturin develop --features python
+# Development build with debug symbols (installs directly into .venv)
+uv run maturin develop --features python
 
 # Release build for distribution (creates wheel file)
-maturin build --release --features python
+uv run maturin build --release --features python
 ```
 
 Use `maturin develop` for development - it compiles the Rust code and installs the Python module directly into your current environment. Use `maturin build --release` when you need to create distribution wheels.
@@ -111,23 +103,20 @@ The parser returns airspaces as Python dictionaries with this structure:
 
 ## Code Quality & Formatting
 
-To keep the codebase clean and consistent, use the following tools. You can run them manually, or automatically before each commit using pre-commit hooks:
+Git hooks are managed by [lefthook](https://github.com/evilmartians/lefthook) (config in `lefthook.yml`). Install them once per clone:
 
-### Pre-commit Hook Setup
+```bash
+uv run lefthook install
+```
 
-1. Install pre-commit (once per machine): `pip install pre-commit`
-2. Install the hooks (once per clone): `pre-commit install`
-3. Now, every commit will automatically run:
+On commit, the hooks run against the staged files:
 
-   ```bash
-   flake8 python/ --extend-ignore E501,E203
-   mypy python/
-   isort python/
-   black python/
-   pydocstyle --convention=google python/
-   npx cspell python/
-   ```
+- **Python**: `ruff check --fix`, `ruff format`, `mypy`
+- **Rust**: `cargo fmt`, `cargo clippy -- -D warnings`
+- **Spelling**: `cspell` (project words go in `cspell-dictionary.txt`)
 
-You can also run all hooks manually: `pre-commit run --all-files` or specific hooks `pre-commit run cspell --all-files`
+On push, `cargo test` runs.
+
+Run the hooks manually with `uv run lefthook run pre-commit` (add `--all-files` to check the whole repo).
 
 If you need to skip hooks for a commit, use `git commit --no-verify`.

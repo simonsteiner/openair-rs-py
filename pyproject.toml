@@ -28,18 +28,42 @@ classifiers = [
 ]
 dynamic = []
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "black>=26.5.1",
-    "flake8>=7.4.1",
-    "isort>=9.0.1",
+    "lefthook>=2.1.10",
     "maturin>=1.15.0",
     "mypy>=2.3.1",
-    "pre_commit>=4.6.2",
-    "pydocstyle>=6.3.0",
-    "twine>=7.0.0",
+    "ruff>=0.16.3",
 ]
 
 [tool.maturin]
 features = ["pyo3/extension-module", "python"]
 python-source = "python"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+src = ["python"]
+
+[tool.ruff.lint]
+# E/W pycodestyle, F pyflakes, I import sorting, D docstrings.
+# E501 (line length) and E203 are left to the formatter.
+select = ["E", "W", "F", "I", "D"]
+ignore = ["E501", "E203"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["openair"]
+
+[tool.mypy]
+mypy_path = "python"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+# The compiled Rust extension; its types come from openair/__init__.pyi.
+[[tool.mypy.overrides]]
+module = ["openair.openair"]
+ignore_missing_imports = true
