@@ -1,10 +1,7 @@
-use std::io::BufReader;
-use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use serde_json;
-
 // Re-export the main parse function from the library
 pub use crate::parse;
+use pyo3::prelude::*;
+use std::io::BufReader;
 
 /// Parse OpenAir airspace data from a string
 #[pyfunction]
@@ -16,18 +13,18 @@ fn parse_openair_string(data: String) -> PyResult<String> {
             #[cfg(feature = "serde")]
             match serde_json::to_string(&airspaces) {
                 Ok(json) => Ok(json),
-                Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                    format!("Failed to serialize airspaces: {}", e)
-                ))
+                Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
+                    "Failed to serialize airspaces: {e}"
+                ))),
             }
             #[cfg(not(feature = "serde"))]
             Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                "Serde feature not enabled".to_string()
+                "Serde feature not enabled".to_string(),
             ))
         }
-        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-            format!("Failed to parse OpenAir data: {}", e)
-        ))
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
+            "Failed to parse OpenAir data: {e}"
+        ))),
     }
 }
 
@@ -36,12 +33,13 @@ fn parse_openair_string(data: String) -> PyResult<String> {
 fn parse_openair_file(filepath: String) -> PyResult<String> {
     use std::fs::File;
     use std::io::BufReader;
-    
-    let file = File::open(&filepath)
-        .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(
-            format!("Failed to open file '{}': {}", filepath, e)
-        ))?;
-    
+
+    let file = File::open(&filepath).map_err(|e| {
+        PyErr::new::<pyo3::exceptions::PyIOError, _>(format!(
+            "Failed to open file '{filepath}': {e}"
+        ))
+    })?;
+
     let mut reader = BufReader::new(file);
     match parse(&mut reader) {
         Ok(airspaces) => {
@@ -49,18 +47,18 @@ fn parse_openair_file(filepath: String) -> PyResult<String> {
             #[cfg(feature = "serde")]
             match serde_json::to_string(&airspaces) {
                 Ok(json) => Ok(json),
-                Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                    format!("Failed to serialize airspaces: {}", e)
-                ))
+                Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
+                    "Failed to serialize airspaces: {e}"
+                ))),
             }
             #[cfg(not(feature = "serde"))]
             Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                "Serde feature not enabled".to_string()
+                "Serde feature not enabled".to_string(),
             ))
         }
-        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-            format!("Failed to parse OpenAir file '{}': {}", filepath, e)
-        ))
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
+            "Failed to parse OpenAir file '{filepath}': {e}"
+        ))),
     }
 }
 

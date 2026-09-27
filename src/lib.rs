@@ -113,7 +113,7 @@ pub enum Class {
 
 impl fmt::Display for Class {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -151,7 +151,7 @@ impl Class {
             "OCA" => Ok(Self::Oca),
             "POLITICAL" => Ok(Self::Political),
             "NO-FIR" | "NOFIR" => Ok(Self::NoFir),
-            other => Err(format!("Invalid class: {}", other)),
+            other => Err(format!("Invalid class: {other}")),
         }
     }
 }
@@ -179,11 +179,11 @@ impl fmt::Display for Altitude {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Gnd => write!(f, "GND"),
-            Self::FeetAmsl(ft) => write!(f, "{} ft AMSL", ft),
-            Self::FeetAgl(ft) => write!(f, "{} ft AGL", ft),
-            Self::FlightLevel(ft) => write!(f, "FL{}", ft),
+            Self::FeetAmsl(ft) => write!(f, "{ft} ft AMSL"),
+            Self::FeetAgl(ft) => write!(f, "{ft} ft AGL"),
+            Self::FlightLevel(ft) => write!(f, "FL{ft}"),
             Self::Unlimited => write!(f, "Unlimited"),
-            Self::Other(val) => write!(f, "?({})", val),
+            Self::Other(val) => write!(f, "?({val})"),
         }
     }
 }
@@ -212,7 +212,7 @@ impl Altitude {
             fl if fl.starts_with("fl") || fl.starts_with("Fl") || fl.starts_with("FL") => {
                 match fl[2..].trim().parse::<u16>() {
                     Ok(val) => Ok(Self::FlightLevel(val)),
-                    Err(_) => Err(format!("Invalid altitude: {}", fl)),
+                    Err(_) => Err(format!("Invalid altitude: {fl}")),
                 }
             }
             other => {
@@ -221,7 +221,9 @@ impl Altitude {
                 let rest: String = other.chars().skip_while(is_digit_or_dot).collect();
                 // Validate that number contains at most one dot
                 if number.chars().filter(|&c| c == '.').count() > 1 {
-                    return Err(format!("Invalid altitude: multiple dots in number '{}'", number));
+                    return Err(format!(
+                        "Invalid altitude: multiple dots in number '{number}'"
+                    ));
                 }
                 lazy_static! {
                     static ref RE_FT_AMSL: Regex = Regex::new(r"(?i)^ft(:? a?msl)?$").unwrap();
@@ -284,7 +286,7 @@ impl Direction {
         match data {
             "+" => Ok(Self::Cw),
             "-" => Ok(Self::Ccw),
-            _ => Err(format!("Invalid direction: {}", data)),
+            _ => Err(format!("Invalid direction: {data}")),
         }
     }
 }
@@ -347,10 +349,10 @@ impl Coord {
             )
             .unwrap();
         }
-        let invalid = |_| format!("Invalid coord: \"{}\"", data);
+        let invalid = |_| format!("Invalid coord: \"{data}\"");
         let cap = RE
             .captures(data)
-            .ok_or_else(|| format!("Invalid coord: \"{}\"", data))?;
+            .ok_or_else(|| format!("Invalid coord: \"{data}\""))?;
         let lat = Self::multiplier_lat(&cap[3]).map_err(invalid)?
             * Self::parse_component(&cap[1]).map_err(invalid)?;
         let lng = Self::multiplier_lng(&cap[6]).map_err(invalid)?
@@ -375,16 +377,16 @@ impl ArcSegment {
     /// Return the angle if it's in the range 0..360, or an error otherwise.
     fn validate_angle(val: f32) -> Result<f32, String> {
         if val > 360.0 {
-            return Err(format!("Angle {} too large", val));
+            return Err(format!("Angle {val} too large"));
         }
         if val < 0.0 {
-            return Err(format!("Angle {} is negative", val));
+            return Err(format!("Angle {val} is negative"));
         }
         Ok(val)
     }
 
     fn parse(data: &str, centerpoint: Coord, direction: Direction) -> Result<Self, String> {
-        let errmsg = || format!("Invalid arc segment data: {}", data);
+        let errmsg = || format!("Invalid arc segment data: {data}");
         let parts: Vec<f32> = data
             .split(',')
             .map(str::trim)
@@ -416,7 +418,7 @@ pub struct Arc {
 
 impl Arc {
     fn parse(data: &str, centerpoint: Coord, direction: Direction) -> Result<Self, String> {
-        let errmsg = || format!("Invalid arc data: {}", data);
+        let errmsg = || format!("Invalid arc data: {data}");
         let parts: Vec<Coord> = data
             .split(',')
             .map(str::trim)
@@ -468,7 +470,7 @@ impl fmt::Display for Geometry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Polygon { segments } => write!(f, "Polygon[{}]", segments.len()),
-            Self::Circle { radius, .. } => write!(f, "Circle[r={}NM]", radius),
+            Self::Circle { radius, .. } => write!(f, "Circle[r={radius}NM]"),
         }
     }
 }
@@ -620,16 +622,16 @@ impl AirspaceBuilder {
         let name = self.name.ok_or("Missing name")?;
         let class = self
             .class
-            .ok_or_else(|| format!("Missing class for '{}'", name))?;
+            .ok_or_else(|| format!("Missing class for '{name}'"))?;
         let lower_bound = self
             .lower_bound
-            .ok_or_else(|| format!("Missing lower bound for '{}'", name))?;
+            .ok_or_else(|| format!("Missing lower bound for '{name}'"))?;
         let upper_bound = self
             .upper_bound
-            .ok_or_else(|| format!("Missing upper bound for '{}'", name))?;
+            .ok_or_else(|| format!("Missing upper bound for '{name}'"))?;
         let geom = self
             .geom
-            .ok_or_else(|| format!("Missing geom for '{}'", name))?;
+            .ok_or_else(|| format!("Missing geom for '{name}'"))?;
         Ok(Airspace {
             name,
             class,
@@ -661,42 +663,42 @@ fn process(builder: &mut AirspaceBuilder, line: &str) -> Result<(), String> {
     let t2 = chars.next().unwrap_or(' ');
     let data = line.split_once(' ').map(|x| x.1).unwrap_or("").trim();
 
-    trace!("Input: \"{:1}{:1}\"", t1, t2);
+    trace!("Input: \"{t1:1}{t2:1}\"");
     match (t1, t2) {
         ('*', _) => trace!("-> Comment, ignore"),
         ('A', 'C') => {
             // Airspace class
             let class = Class::parse(data)?;
-            trace!("-> Found class: {}", class);
+            trace!("-> Found class: {class}");
             builder.set_class(class)?;
         }
         ('A', 'N') => {
-            trace!("-> Found name: {}", data);
+            trace!("-> Found name: {data}");
             builder.set_name(data.to_string())?;
         }
         ('A', 'L') => {
             let altitude = Altitude::parse(data)?;
-            trace!("-> Found lower bound: {}", altitude);
+            trace!("-> Found lower bound: {altitude}");
             builder.set_lower_bound(altitude)?;
         }
         ('A', 'H') => {
             let altitude = Altitude::parse(data)?;
-            trace!("-> Found upper bound: {}", altitude);
+            trace!("-> Found upper bound: {altitude}");
             builder.set_upper_bound(altitude)?;
         }
         ('A', 'T') => {
             trace!("-> Label placement hint, ignore");
         }
         ('A', 'Y') => {
-            trace!("-> Found type: {}", data);
+            trace!("-> Found type: {data}");
             builder.set_type(data.to_string())?;
         }
         ('A', 'F') => {
-            trace!("-> Found frequency: {}", data);
+            trace!("-> Found frequency: {data}");
             builder.set_frequency(data.to_string())?;
         }
         ('A', 'G') => {
-            trace!("-> Found call sign: {}", data);
+            trace!("-> Found call sign: {data}");
             builder.set_call_sign(data.to_string())?;
         }
         ('S', 'P') => trace!("-> Pen, ignore"),
@@ -720,7 +722,7 @@ fn process(builder: &mut AirspaceBuilder, line: &str) -> Result<(), String> {
             trace!("-> Found circle radius");
             let radius = data
                 .parse::<f32>()
-                .map_err(|_| format!("Invalid radius: {}", data))?;
+                .map_err(|_| format!("Invalid radius: {data}"))?;
             builder.set_circle_radius(radius)?;
         }
         ('D', 'A') => {
@@ -737,7 +739,7 @@ fn process(builder: &mut AirspaceBuilder, line: &str) -> Result<(), String> {
             let arc = Arc::parse(data, centerpoint, direction)?;
             builder.add_segment(PolygonSegment::Arc(arc))?;
         }
-        (t1, t2) => return Err(format!("Parse error (unexpected \"{:1}{:1}\")", t1, t2)),
+        (t1, t2) => return Err(format!("Parse error (unexpected \"{t1:1}{t2:1}\")")),
     }
     Ok(())
 }
@@ -753,7 +755,7 @@ pub fn parse<R: BufRead>(reader: &mut R) -> Result<Vec<Airspace>, String> {
         buf.clear();
         let bytes_read = reader
             .read_until(0x0a /*\n*/, &mut buf)
-            .map_err(|e| format!("Could not read line: {}", e))?;
+            .map_err(|e| format!("Could not read line: {e}"))?;
         if bytes_read == 0 {
             // EOF
             trace!("Reached EOF");
@@ -892,12 +894,27 @@ mod tests {
                 Altitude::FeetAmsl(42)
             );
             // Extended: floats and meters
-            assert_eq!(Altitude::parse("4500.0FT AMSL").unwrap(), Altitude::FeetAmsl(4500));
-            assert_eq!(Altitude::parse("4500.0 ft AMSL").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(
+                Altitude::parse("4500.0FT AMSL").unwrap(),
+                Altitude::FeetAmsl(4500)
+            );
+            assert_eq!(
+                Altitude::parse("4500.0 ft AMSL").unwrap(),
+                Altitude::FeetAmsl(4500)
+            );
             assert_eq!(Altitude::parse("1371m").unwrap(), Altitude::FeetAmsl(4498));
-            assert_eq!(Altitude::parse("1371 msl").unwrap(), Altitude::FeetAmsl(4498));
-            assert_eq!(Altitude::parse("4500.0ft").unwrap(), Altitude::FeetAmsl(4500));
-            assert_eq!(Altitude::parse("4500.0 FT").unwrap(), Altitude::FeetAmsl(4500));
+            assert_eq!(
+                Altitude::parse("1371 msl").unwrap(),
+                Altitude::FeetAmsl(4498)
+            );
+            assert_eq!(
+                Altitude::parse("4500.0ft").unwrap(),
+                Altitude::FeetAmsl(4500)
+            );
+            assert_eq!(
+                Altitude::parse("4500.0 FT").unwrap(),
+                Altitude::FeetAmsl(4500)
+            );
             assert_eq!(Altitude::parse("0m").unwrap(), Altitude::FeetAmsl(0));
         }
 
@@ -909,21 +926,48 @@ mod tests {
             assert_eq!(Altitude::parse("42 GND").unwrap(), Altitude::FeetAgl(42));
             assert_eq!(Altitude::parse("42SFC").unwrap(), Altitude::FeetAgl(42));
             // Extended: floats and meters
-            assert_eq!(Altitude::parse("500ft agl").unwrap(), Altitude::FeetAgl(500));
-            assert_eq!(Altitude::parse("500.0FT GND").unwrap(), Altitude::FeetAgl(500));
-            assert_eq!(Altitude::parse("500 m agl").unwrap(), Altitude::FeetAgl(1640));
+            assert_eq!(
+                Altitude::parse("500ft agl").unwrap(),
+                Altitude::FeetAgl(500)
+            );
+            assert_eq!(
+                Altitude::parse("500.0FT GND").unwrap(),
+                Altitude::FeetAgl(500)
+            );
+            assert_eq!(
+                Altitude::parse("500 m agl").unwrap(),
+                Altitude::FeetAgl(1640)
+            );
         }
 
         #[test]
         fn parse_rounded_float_altitude() {
             // Values that are not exactly whole numbers, but close enough to be rounded
-            assert_eq!(Altitude::parse("4500.4 ft").unwrap(), Altitude::FeetAmsl(4500));
-            assert_eq!(Altitude::parse("4500.6 ft").unwrap(), Altitude::FeetAmsl(4501));
-            assert_eq!(Altitude::parse("500.49 ft agl").unwrap(), Altitude::FeetAgl(500));
-            assert_eq!(Altitude::parse("500.51 ft agl").unwrap(), Altitude::FeetAgl(501));
+            assert_eq!(
+                Altitude::parse("4500.4 ft").unwrap(),
+                Altitude::FeetAmsl(4500)
+            );
+            assert_eq!(
+                Altitude::parse("4500.6 ft").unwrap(),
+                Altitude::FeetAmsl(4501)
+            );
+            assert_eq!(
+                Altitude::parse("500.49 ft agl").unwrap(),
+                Altitude::FeetAgl(500)
+            );
+            assert_eq!(
+                Altitude::parse("500.51 ft agl").unwrap(),
+                Altitude::FeetAgl(501)
+            );
             // Values with a significant fractional part should still be accepted, but log info
-            assert_eq!(Altitude::parse("1234.123 ft").unwrap(), Altitude::FeetAmsl(1234));
-            assert_eq!(Altitude::parse("999.999 ft agl").unwrap(), Altitude::FeetAgl(1000));
+            assert_eq!(
+                Altitude::parse("1234.123 ft").unwrap(),
+                Altitude::FeetAmsl(1234)
+            );
+            assert_eq!(
+                Altitude::parse("999.999 ft agl").unwrap(),
+                Altitude::FeetAgl(1000)
+            );
         }
 
         #[test]
@@ -944,7 +988,10 @@ mod tests {
             assert_eq!(Altitude::parse("UNLIM").unwrap(), Altitude::Unlimited);
             assert_eq!(Altitude::parse("unlimited").unwrap(), Altitude::Unlimited);
             assert!(matches!(Altitude::parse("foo"), Ok(Altitude::Other(_))));
-            assert!(matches!(Altitude::parse("123 bananas"), Ok(Altitude::Other(_))));
+            assert!(matches!(
+                Altitude::parse("123 bananas"),
+                Ok(Altitude::Other(_))
+            ));
         }
 
         #[test]
@@ -1232,7 +1279,9 @@ mod tests {
                         assert!((first.lng - last.lng).abs() < 1e-8);
                     }
                     // Check that there is at least one Arc segment
-                    assert!(segments.iter().any(|seg| matches!(seg, PolygonSegment::Arc(_))));
+                    assert!(segments
+                        .iter()
+                        .any(|seg| matches!(seg, PolygonSegment::Arc(_))));
                 }
                 _ => panic!("Expected polygon geometry"),
             }
