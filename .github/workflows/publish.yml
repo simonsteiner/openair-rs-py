@@ -21,8 +21,8 @@ permissions:
   contents: read
 
 jobs:
-  # Fails fast, before the wheel matrix, on a tag that does not match the
-  # package version or has no dated CHANGELOG section.
+  # check and ci gate the wheel matrix. check fails fast on a tag that does
+  # not match the package version or has no dated CHANGELOG section.
   check:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -45,8 +45,8 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   linux:
-    needs: check
-    if: ${{ !cancelled() && needs.check.result != 'failure' }}
+    needs: [check, ci]
+    if: ${{ !cancelled() && needs.check.result != 'failure' && needs.ci.result == 'success' }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -82,8 +82,8 @@ jobs:
           path: dist
 
   musllinux:
-    needs: check
-    if: ${{ !cancelled() && needs.check.result != 'failure' }}
+    needs: [check, ci]
+    if: ${{ !cancelled() && needs.check.result != 'failure' && needs.ci.result == 'success' }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -115,8 +115,8 @@ jobs:
           path: dist
 
   windows:
-    needs: check
-    if: ${{ !cancelled() && needs.check.result != 'failure' }}
+    needs: [check, ci]
+    if: ${{ !cancelled() && needs.check.result != 'failure' && needs.ci.result == 'success' }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -149,8 +149,8 @@ jobs:
           path: dist
 
   macos:
-    needs: check
-    if: ${{ !cancelled() && needs.check.result != 'failure' }}
+    needs: [check, ci]
+    if: ${{ !cancelled() && needs.check.result != 'failure' && needs.ci.result == 'success' }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -182,8 +182,8 @@ jobs:
           path: dist
 
   sdist:
-    needs: check
-    if: ${{ !cancelled() && needs.check.result != 'failure' }}
+    needs: [check, ci]
+    if: ${{ !cancelled() && needs.check.result != 'failure' && needs.ci.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
