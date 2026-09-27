@@ -8,7 +8,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Union
 
 try:
-    from .openair import parse_openair_file, parse_openair_string
+    # The compiled Rust extension; its types come from __init__.pyi.
+    from .openair import (  # type: ignore[import-not-found]
+        parse_openair_file,
+        parse_openair_string,
+    )
 except ImportError:
     # Fallback for development - the Rust module needs to be built
     def parse_openair_string(data: str) -> str:
