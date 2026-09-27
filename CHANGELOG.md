@@ -15,6 +15,8 @@ Possible log types:
 
 ### Unreleased
 
+### v0.2.1 (2026-09-27)
+
 - [fixed] Latitudes whose degrees are padded to three digits like longitude's (`DP 004:45:57.000 N 076:00:46.000 W`) parse again. 0.1.x read them; 0.2.0 took upstream's two-digit limit and rejected the whole file. Degrees above 90 are still rejected
 - [changed] Not in the v0.2.0 notes, but changed there with the upstream altitude parser: a height with no unit (`AH 2300 MSL`, `AH 4572`) is read as feet, as the OpenAir format specifies. 0.1.x read `AH 2300 MSL` as metres and could not read `AH 4572` at all
 - [added] Releases are cut from a GitHub Actions workflow, and each one gets a GitHub Release with its changelog section as notes and the wheels attached. See `RELEASING.md`
