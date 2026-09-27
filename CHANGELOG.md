@@ -13,7 +13,7 @@ Possible log types:
 
 ## Python Bindings (openair-rs-py)
 
-### v0.2.0 (unreleased)
+### v0.2.0 (2026-09-27)
 
 Rust core synced with upstream glide-rs/openair-rs v0.6.0.
 
