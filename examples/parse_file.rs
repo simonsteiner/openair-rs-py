@@ -1,5 +1,4 @@
-use std::fs::File;
-use std::io::BufReader;
+use std::{fs::File, io::BufReader};
 
 use openair::parse;
 
@@ -24,10 +23,12 @@ fn main() -> std::io::Result<()> {
     let mut reader = BufReader::new(file);
 
     // Process airspaces
-    let airspaces = parse(&mut reader).unwrap_or_else(|e| fail!(e));
+    let airspaces: Vec<_> = parse(&mut reader)
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap_or_else(|e| fail!(e));
     println!("Airspaces:");
     for airspace in airspaces {
-        println!("- {}", airspace);
+        println!("- {airspace}");
     }
     println!("Done.");
 

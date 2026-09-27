@@ -1,0 +1,22 @@
+version: 2
+updates:
+
+  # Create PRs for GitHub Actions updates
+  # src: https://github.com/marketplace/actions/build-and-push-docker-images#keep-up-to-date-with-github-dependabot
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  # Note: Rust dependencies are not handled here. For those dependencies, we
+  # want Dependabot only for security updates, which is already enabled through
+  # GitHub repository settings.
+
+  # Python dev tooling (ruff, mypy, pytest, maturin, lefthook) in uv.lock.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      python-dev:
+        patterns: ["*"]

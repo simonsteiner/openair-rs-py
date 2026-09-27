@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Example usage of the OpenAir Python bindings."""
+"""Example usage of the OpenAir Python bindings.
 
-from openair import parse_file, parse_string
+Run from the repository root: ``uv run python python/example.py``
+"""
 
-# Example OpenAir data
-openair_data = """
+from openair import parse_file, parse_string, write_string
+
+OPENAIR_DATA = """
 AC D
 AN EXAMPLE CTR
 AL GND
@@ -13,42 +15,38 @@ DP 46:57:13 N 008:27:52 E
 DP 46:57:46 N 008:30:41 E
 DP 46:57:55 N 008:28:40 E
 DP 46:57:13 N 008:27:52 E
+
+AC R
+AN EXAMPLE RESTRICTED
+AL 1371.6m
+AH FL100
+V X=46:57:30 N 008:29:00 E
+DC 2.5
 """
 
 
-def main():
-    """Demonstrate parsing OpenAir data from a string and a file using the bindings."""
-    try:
-        # Parse the example data
-        airspaces = parse_string(openair_data)
+def main() -> None:
+    """Parse from a string and a file, then write OpenAir back out."""
+    airspaces = parse_string(OPENAIR_DATA)
+    print(f"Parsed {len(airspaces)} airspace(s) from string:")
+    for i, airspace in enumerate(airspaces, start=1):
+        geom = airspace["geom"]
+        print(f"  {i}. {airspace['name']} (class {airspace['class']})")
+        print(f"     {airspace['lowerBound']} -> {airspace['upperBound']}")
+        if geom["type"] == "Polygon":
+            print(f"     Polygon with {len(geom['segments'])} segments")
+        else:
+            print(f"     Circle, radius {geom['radius']} NM")
 
-        print(f"Parsed {len(airspaces)} airspace(s) from string:")
-        for i, airspace in enumerate(airspaces):
-            print(f"  {i+1}. {airspace['name']} (Class {airspace['class']})")
-            print(f"     Lower bound: {airspace['lowerBound']}")
-            print(f"     Upper bound: {airspace['upperBound']}")
-            print(f"     Geometry: {airspace['geom']['type']}")
-            if airspace["geom"]["type"] == "Polygon":
-                segment_count = len(airspace["geom"]["segments"])
-                print(f"     Segments: {segment_count}")
-            elif airspace["geom"]["type"] == "Circle":
-                radius = airspace["geom"]["radius"]
-                print(f"     Radius: {radius} NM")
-            print()
+    # Legacy AC tokens like R/Q/P/CTR can be moved into AY (class becomes UNC).
+    normalized = parse_string(OPENAIR_DATA, normalize_legacy_classes=True)
+    print(f"\nNormalized: class={normalized[1]['class']} type={normalized[1]['type']}")
 
-        # Example: parse from file
-        print("\nParsing from file example_data/Switzerland.txt ...")
-        airspaces_file = parse_file("../example_data/Switzerland.txt")
-        print(f"Parsed {len(airspaces_file)} airspace(s) from file.")
-        if airspaces_file:
-            first = airspaces_file[0]
-            print(f"First airspace: {first['name']} (Class {first['class']})")
-            print(f"  Lower bound: {first['lowerBound']}")
-            print(f"  Upper bound: {first['upperBound']}")
-            print(f"  Geometry: {first['geom']['type']}")
+    print("\nWritten back as OpenAir:\n")
+    print(write_string(airspaces))
 
-    except Exception as e:
-        print(f"Error parsing OpenAir data: {e}")
+    airspaces_file = parse_file("example_data/Switzerland.txt")
+    print(f"Parsed {len(airspaces_file)} airspace(s) from example_data/Switzerland.txt")
 
 
 if __name__ == "__main__":

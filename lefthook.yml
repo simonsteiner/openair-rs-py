@@ -1,0 +1,54 @@
+# Ref: https://github.com/evilmartians/lefthook
+# Install the git hooks with: uv run lefthook install
+
+pre-commit:
+  parallel: true
+  commands:
+    ruff-check:
+      priority: 1
+      glob: "*.py"
+      run: uv run ruff check --fix {staged_files}
+      stage_fixed: true
+
+    ruff-format:
+      priority: 2
+      glob: "*.{py,pyi}"
+      run: uv run ruff format {staged_files}
+      stage_fixed: true
+
+    # *.py only: python/openair/ has both __init__.py and __init__.pyi, and
+    # passing both makes mypy stop on a duplicate module.
+    mypy:
+      priority: 3
+      glob: "*.py"
+      run: uv run mypy --explicit-package-bases {staged_files}
+
+    # Same pinned nightly as upstream's CI: .rustfmt.toml uses unstable
+    # import-grouping options that stable rustfmt ignores.
+    # One-time: rustup toolchain install nightly-2025-10-18 --component rustfmt
+    rustfmt:
+      priority: 4
+      glob: "*.rs"
+      run: cargo +nightly-2025-10-18 fmt -- {staged_files}
+      stage_fixed: true
+
+    # Whole crate rather than the staged files: clippy lints a crate, not a
+    # file. lib.rs has `#![deny(clippy::all)]`, so this matches what fails
+    # the build anyway.
+    clippy:
+      priority: 5
+      glob: "*.rs"
+      run: cargo clippy --features python --all-targets -- -D warnings
+
+    cspell:
+      priority: 6
+      glob: "*.{py,pyi,rs,md,txt,toml,yml,yaml,json,cfg,ini}"
+      run: npx --yes cspell --no-progress --no-must-find-files --config cspell.json {staged_files}
+
+pre-push:
+  commands:
+    cargo-test:
+      run: cargo test --features serde
+
+    pytest:
+      run: uv run pytest

@@ -1,73 +1,109 @@
-use std::io::BufReader;
-use pyo3::prelude::*;
-#[cfg(feature = "python")]
-use serde_json;
+//! Python bindings, built with `maturin` (feature `python`).
+//!
+//! Airspaces cross the boundary as plain Python dicts/lists in the same shape
+//! as the serde JSON output; `python/openair/types.py` describes it.
 
-// Re-export the main parse function from the library
-pub use crate::parse;
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, BufWriter, Write},
+    path::PathBuf,
+};
 
-/// Parse OpenAir airspace data from a string
-#[pyfunction]
-fn parse_openair_string(data: String) -> PyResult<String> {
-    let mut reader = BufReader::new(data.as_bytes());
-    match parse(&mut reader) {
-        Ok(airspaces) => {
-            // Serialize to JSON for easy Python consumption
-            #[cfg(feature = "serde")]
-            match serde_json::to_string(&airspaces) {
-                Ok(json) => Ok(json),
-                Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                    format!("Failed to serialize airspaces: {}", e)
-                ))
-            }
-            #[cfg(not(feature = "serde"))]
-            Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                "Serde feature not enabled".to_string()
-            ))
+use pyo3::{
+    exceptions::{PyIOError, PyValueError},
+    prelude::*,
+};
+use pythonize::{depythonize, pythonize};
+
+use crate::Airspace;
+
+fn parse_airspaces<R: BufRead>(
+    reader: R,
+    normalize_legacy_classes: bool,
+) -> PyResult<Vec<Airspace>> {
+    let mut airspaces = crate::parse(reader)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| PyValueError::new_err(format!("Failed to parse OpenAir data: {e}")))?;
+    if normalize_legacy_classes {
+        for airspace in &mut airspaces {
+            airspace
+                .normalize_legacy_class()
+                .map_err(|e| PyValueError::new_err(e.to_string()))?;
         }
-        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-            format!("Failed to parse OpenAir data: {}", e)
-        ))
     }
+    Ok(airspaces)
 }
 
-/// Parse OpenAir airspace data from a file path
-#[pyfunction]
-fn parse_openair_file(filepath: String) -> PyResult<String> {
-    use std::fs::File;
-    use std::io::BufReader;
-    
-    let file = File::open(&filepath)
-        .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(
-            format!("Failed to open file '{}': {}", filepath, e)
-        ))?;
-    
-    let mut reader = BufReader::new(file);
-    match parse(&mut reader) {
-        Ok(airspaces) => {
-            // Serialize to JSON for easy Python consumption
-            #[cfg(feature = "serde")]
-            match serde_json::to_string(&airspaces) {
-                Ok(json) => Ok(json),
-                Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                    format!("Failed to serialize airspaces: {}", e)
-                ))
-            }
-            #[cfg(not(feature = "serde"))]
-            Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                "Serde feature not enabled".to_string()
-            ))
-        }
-        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-            format!("Failed to parse OpenAir file '{}': {}", filepath, e)
-        ))
-    }
+fn to_python<'py>(py: Python<'py>, airspaces: &[Airspace]) -> PyResult<Bound<'py, PyAny>> {
+    pythonize(py, airspaces)
+        .map_err(|e| PyValueError::new_err(format!("Failed to convert airspaces: {e}")))
 }
 
-/// A Python module for parsing OpenAir airspace files
-#[pymodule]
+fn from_python(airspaces: &Bound<'_, PyAny>) -> PyResult<Vec<Airspace>> {
+    depythonize(airspaces).map_err(|e| PyValueError::new_err(format!("Invalid airspace: {e}")))
+}
+
+/// Parse OpenAir airspace data from a string.
+#[pyfunction]
+#[pyo3(signature = (data, *, normalize_legacy_classes = false))]
+fn parse_string<'py>(
+    py: Python<'py>,
+    data: &str,
+    normalize_legacy_classes: bool,
+) -> PyResult<Bound<'py, PyAny>> {
+    let airspaces = py.detach(|| parse_airspaces(data.as_bytes(), normalize_legacy_classes))?;
+    to_python(py, &airspaces)
+}
+
+/// Parse OpenAir airspace data from a file path.
+#[pyfunction]
+#[pyo3(signature = (path, *, normalize_legacy_classes = false))]
+fn parse_file<'py>(
+    py: Python<'py>,
+    path: PathBuf,
+    normalize_legacy_classes: bool,
+) -> PyResult<Bound<'py, PyAny>> {
+    let airspaces = py.detach(|| {
+        let file = File::open(&path).map_err(|e| {
+            PyIOError::new_err(format!("Failed to open file '{}': {e}", path.display()))
+        })?;
+        parse_airspaces(BufReader::new(file), normalize_legacy_classes)
+    })?;
+    to_python(py, &airspaces)
+}
+
+/// Write airspaces to a string in OpenAir format.
+#[pyfunction]
+fn write_string(py: Python<'_>, airspaces: &Bound<'_, PyAny>) -> PyResult<String> {
+    let airspaces = from_python(airspaces)?;
+    py.detach(|| {
+        let mut buf = Vec::new();
+        crate::write(&mut buf, &airspaces).map_err(|e| PyIOError::new_err(e.to_string()))?;
+        String::from_utf8(buf).map_err(|e| PyValueError::new_err(e.to_string()))
+    })
+}
+
+/// Write airspaces to a file in OpenAir format.
+#[pyfunction]
+fn write_file(py: Python<'_>, airspaces: &Bound<'_, PyAny>, path: PathBuf) -> PyResult<()> {
+    let airspaces = from_python(airspaces)?;
+    py.detach(|| {
+        let file = File::create(&path).map_err(|e| {
+            PyIOError::new_err(format!("Failed to create file '{}': {e}", path.display()))
+        })?;
+        let mut writer = BufWriter::new(file);
+        crate::write(&mut writer, &airspaces)
+            .and_then(|()| writer.flush())
+            .map_err(|e| PyIOError::new_err(e.to_string()))
+    })
+}
+
+/// A Python module for reading and writing OpenAir airspace files.
+#[pymodule(gil_used = false)]
 fn openair(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(parse_openair_string, m)?)?;
-    m.add_function(wrap_pyfunction!(parse_openair_file, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_string, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_file, m)?)?;
+    m.add_function(wrap_pyfunction!(write_string, m)?)?;
+    m.add_function(wrap_pyfunction!(write_file, m)?)?;
     Ok(())
 }

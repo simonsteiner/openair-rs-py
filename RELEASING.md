@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Make sure you have the required tools installed: `pip install maturin twine`
+Install the dev dependencies (includes maturin): `uv sync`
 
 ## Update version numbers
 
@@ -11,15 +11,15 @@ Update version in `pyproject.toml`
 ## Update changelog
 
 Update changelog in `CHANGELOG.md`
-To see changes since the last release, run: `git log --oneline v0.1.1..HEAD`
+To see changes since the last release, run: `git log --oneline v0.1.4..HEAD`
 
 ## Build and test locally
 
 Build the Python package locally to test:
 
 ```bash
-maturin build --release
-maturin develop  # Install in current Python environment for testing
+uv run maturin build --release
+uv run maturin develop  # Install into .venv for testing
 ```
 
 ## Commit & tag
@@ -50,17 +50,16 @@ If you need to publish manually, you can use maturin directly:
 Build wheels for multiple platforms:
 
 ```bash
-maturin build --release --interpreter python3.8 python3.9 python3.10 python3.11 python3.12
+uv run maturin build --release --interpreter python3.10 python3.11 python3.12 python3.13 python3.14
 ```
 
-Upload to PyPI: `maturin publish`
-or manually upload with twine: `twine upload target/wheels/*.whl`
+Upload to PyPI: `uv run maturin publish`
 
 ## Notes
 
 - The Python package name will be `openair-rs-py` as defined in `pyproject.toml`
 - GitHub Actions automatically builds wheels for multiple platforms and Python versions
-- Make sure you have set the `PYPI_API_TOKEN` secret in your GitHub repository settings
+- Publishing uses PyPI [trusted publishing](https://docs.pypi.org/trusted-publishers/): on pypi.org, add a GitHub publisher for `simonsteiner/openair-rs-py`, workflow `publish.yml`, environment `pypi`. No API token secret is needed
 - The workflow builds for Linux (x86_64, x86, aarch64, armv7, s390x, ppc64le), Windows (x64, x86), and macOS (x86_64, aarch64)
 - This process only publishes to PyPI (not crates.io) since this is a fork focused on Python usage
 - Publishing is triggered automatically when you push a version tag (e.g., `v1.0.0`)

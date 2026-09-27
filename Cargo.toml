@@ -1,39 +1,38 @@
 [package]
 name = "openair"
-version = "0.3.2"
-authors = ["Danilo Bargen <mail@dbrgn.ch>"]
-description = "Parser for airspace files in OpenAir format."
+version = "0.6.0"
+description = "Library for reading and writing airspace files in OpenAir format."
 keywords = ["airspace", "skytraxx", "variometer", "openair", "parser"]
 categories = ["parser-implementations"]
-homepage = "https://github.com/dbrgn/openair-rs/"
-repository = "https://github.com/dbrgn/openair-rs/"
+homepage = "https://github.com/glide-rs/openair-rs/"
+repository = "https://github.com/glide-rs/openair-rs/"
 readme = "README.md"
 license = "MIT/Apache-2.0"
 include = ["/src/**/*", "/examples/**/*", "/tests/**/*", "/Cargo.toml", "/README.md", "/LICENSE-*"]
-edition = "2021"
+edition = "2024"
 
 [lib]
 name = "openair"
 crate-type = ["cdylib", "rlib"]
 
-[badges]
-circle-ci = { repository = "dbrgn/openair-rs" }
-maintenance = { status = "actively-developed" }
-
-[dependencies]
-lazy_static = "1"
-log = "0.4"
-regex = "1"
-serde = { version = "1", optional = true, features = ["derive"] }
-serde_json = { version = "1", optional = true }
-pyo3 = { version = "0.25", features = ["extension-module"], optional = true }
-
-[dev-dependencies]
-env_logger = "0.11"
-serde_json = "1"
-indoc = "2"
+[[bench]]
+name = "parser"
+harness = false
 
 [features]
-default = []
-serde = ["dep:serde"]
-python = ["pyo3", "serde", "dep:serde_json"]
+serde = ["dep:serde", "iso8601/serde"]
+python = ["dep:pyo3", "dep:pythonize", "serde"]
+
+[dependencies]
+iso8601 = "0.6"
+log = "0.4"
+serde = { version = "1", optional = true, features = ["derive"] }
+pyo3 = { version = "0.29", features = ["extension-module"], optional = true }
+pythonize = { version = "0.29", optional = true }
+
+[dev-dependencies]
+criterion = "0.7"
+env_logger = "0.11"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+indoc = "2"
+insta = { version = "1", features = ["json"] }
