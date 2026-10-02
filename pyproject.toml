@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "openair-rs-py"
 version = "0.2.1"
-description = "Python bindings for OpenAir airspace file parser"
+description = "Fast, typed Python bindings for reading and writing OpenAir airspace files, powered by the Rust openair crate"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["airspace", "aviation", "openair", "parser"]
