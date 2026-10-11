@@ -1,3 +1,5 @@
+> Copy of the upstream [glide-rs/openair-rs](https://github.com/glide-rs/openair-rs) README, kept as reference for the Rust crate this package wraps.
+
 # openair-rs
 
 [![CI](https://github.com/glide-rs/openair-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/glide-rs/openair-rs/actions/workflows/ci.yml)
@@ -6,7 +8,7 @@
 A Rust library for reading and writing airspace files in OpenAir format (used by flight instruments
 like Skytraxx and others).
 
-https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md (see also `FORMAT.txt`)
+https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md (see also [openair-format.txt](./openair-format.txt))
 
 Docs: https://docs.rs/openair/
 
@@ -86,9 +88,9 @@ To include serialization of all data types, enable the `serde` feature.
 
 Licensed under either of
 
- * Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+ * Apache License, Version 2.0 ([LICENSE-APACHE](../../LICENSE-APACHE) or
    http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or
+ * MIT license ([LICENSE-MIT](../../LICENSE-MIT) or
    http://opensource.org/licenses/MIT) at your option.
 
 ### Contribution
