@@ -40,7 +40,7 @@ The `AY` token of an airspace, such as `CTR` or `R`.
 _Avoid_: kind
 
 **Legacy class**:
-An `AC` token from the original spec that names a type rather than a class: `R`, `Q`, `P`, `CTR`, `GP`, `W`, `RMZ`, `TMZ`.
+A legacy `AC` token that names a type rather than a class: `R`, `Q`, `P`, `CTR`, `GP`, `W`, `RMZ`, `TMZ`.
 _Avoid_: legacy type, legacy token
 
 **Normalization**:
