@@ -1,16 +1,8 @@
 # openair-rs-py
 
-**Note:** _This is a fork of <https://github.com/glide-rs/openair-rs> (formerly dbrgn/openair-rs) with Python bindings. See [README_ORIG.md](./README_ORIG.md) for the upstream readme._
+**Note:** _This is a fork of <https://github.com/glide-rs/openair-rs> (formerly dbrgn/openair-rs) with Python bindings. See [docs/reference/upstream-readme.md](https://github.com/simonsteiner/openair-rs-py/blob/main/docs/reference/upstream-readme.md) for the upstream readme._
 
 Python bindings for reading and writing OpenAir airspace files, backed by the Rust `openair` crate.
-
-## Openair Format specification
-
-<https://web.archive.org/web/20220703063934/http://www.winpilot.com/usersguide/userairspace.asp> (original page no longer available, archived version linked)
-
-see also [FORMAT.txt](./FORMAT.txt)
-
-OpenAir v2 (Naviter): <https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md>
 
 ## Features
 
@@ -27,35 +19,6 @@ OpenAir v2 (Naviter): <https://github.com/naviter/seeyou_file_formats/blob/main/
 ```bash
 pip install openair-rs-py
 ```
-
-## Development
-
-### Prerequisites
-
-1. **Rust toolchain**: Install from [rustup.rs](https://rustup.rs/)
-2. **Python 3.10+**
-3. **uv**: Install from [docs.astral.sh/uv](https://docs.astral.sh/uv/)
-
-### Building and Installation
-
-#### Setup Development Environment
-
-```bash
-# Create .venv, install the dev dependencies and build the package into it
-uv sync
-```
-
-#### Build Commands
-
-```bash
-# Development build with debug symbols (installs directly into .venv)
-uv run maturin develop --features python
-
-# Release build for distribution (creates wheel file)
-uv run maturin build --release --features python
-```
-
-Use `maturin develop` for development - it compiles the Rust code and installs the Python module directly into your current environment. Use `maturin build --release` when you need to create distribution wheels.
 
 ## Usage
 
@@ -124,30 +87,22 @@ The parser returns airspaces as Python dictionaries with this structure:
     "type": "Polygon",
     "segments": [
       {"type": "Point", "lat": 46.95361, "lng": 8.46444},
-      {"type": "Point", "lat": 46.96277, "lng": 8.51138}
+      {"type": "Point", "lat": 46.96277, "lng": 8.51138},
+      {"type": "Point", "lat": 46.96527, "lng": 8.47777}
     ]
   }
 }
 ```
 
----
+## OpenAir format specification
 
-## Code Quality & Formatting
+- OpenAir v2 (Naviter): <https://github.com/naviter/seeyou_file_formats/blob/main/OpenAir_File_Format_Support.md>
+- Original WinPilot spec: <https://web.archive.org/web/20220703063934/http://www.winpilot.com/usersguide/userairspace.asp> (archived; a plain-text copy is in [docs/reference/openair-format.txt](https://github.com/simonsteiner/openair-rs-py/blob/main/docs/reference/openair-format.txt))
 
-Git hooks are managed by [lefthook](https://github.com/evilmartians/lefthook) (config in `lefthook.yml`). Install them once per clone:
+## Documentation
 
-```bash
-uv run lefthook install
-```
-
-On commit, the hooks run against the staged files:
-
-- **Python**: `ruff check --fix`, `ruff format`, `mypy`
-- **Rust**: `cargo fmt`, `cargo clippy -- -D warnings`
-- **Spelling**: `cspell` (project words go in `cspell-dictionary.txt`)
-
-On push, `cargo test` runs.
-
-Run the hooks manually with `uv run lefthook run pre-commit` (add `--all-files` to check the whole repo).
-
-If you need to skip hooks for a commit, use `git commit --no-verify`.
+- [docs/setup.md](https://github.com/simonsteiner/openair-rs-py/blob/main/docs/setup.md): development setup, tests, git hooks
+- [docs/releasing.md](https://github.com/simonsteiner/openair-rs-py/blob/main/docs/releasing.md): cutting a release and publishing to PyPI
+- [CHANGELOG.md](https://github.com/simonsteiner/openair-rs-py/blob/main/CHANGELOG.md): release notes
+- [GLOSSARY.md](https://github.com/simonsteiner/openair-rs-py/blob/main/GLOSSARY.md): OpenAir and domain terms used in the code and docs
+- [AGENTS.md](https://github.com/simonsteiner/openair-rs-py/blob/main/AGENTS.md): rules for coding agents working on this repo

@@ -16,11 +16,9 @@ pre-commit:
       run: uv run ruff format {staged_files}
       stage_fixed: true
 
-    # *.py only: python/openair/ has both __init__.py and __init__.pyi, and
-    # passing both makes mypy stop on a duplicate module.
     mypy:
       priority: 3
-      glob: "*.py"
+      glob: "*.{py,pyi}"
       run: uv run mypy --explicit-package-bases {staged_files}
 
     # Same pinned nightly as upstream's CI: .rustfmt.toml uses unstable

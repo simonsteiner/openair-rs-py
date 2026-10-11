@@ -43,7 +43,7 @@ fn strip_prefix_ci<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
 }
 
 /// Check if a suffix indicates AMSL (above mean sea level)
-/// Empty string defaults to AMSL per README: "Altitude levels without a unit specifier will be treated as feet"
+/// Empty string defaults to AMSL per docs/reference/upstream-readme.md: "Altitude levels without a unit specifier will be treated as feet"
 fn is_amsl_suffix(s: &str) -> bool {
     s.is_empty() || s.eq_ignore_ascii_case("amsl") || s.eq_ignore_ascii_case("msl")
 }
