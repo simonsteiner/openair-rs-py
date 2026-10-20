@@ -1,3 +1,4 @@
 # Real-world OpenAir airspace files downloaded from national and competition
-# sources (see example_data/README.md); nobody edits them by hand.
-example_data/** linguist-generated
+# sources and never edited by hand. The README next to them is hand-written
+# and stays checked; see it for each file's source.
+example_data/*.txt linguist-generated

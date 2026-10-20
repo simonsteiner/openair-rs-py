@@ -67,8 +67,8 @@ On commit, the hooks run against the staged files:
 - **Spelling**: `cspell` (project words go in `cspell-dictionary.txt`)
 - **File size**: `scripts/hooks/check-file-tokens.py` blocks any file over
   5,000 tokens (bytes / 4) and prints how to split it. Files nobody writes by
-  hand, such as `example_data/`, are marked `linguist-generated` in
-  `.gitattributes` and skipped.
+  hand, such as the airspace files in `example_data/`, are marked
+  `linguist-generated` in `.gitattributes` and skipped.
 
 On push, `cargo test --features serde` and `uv run pytest` run.
 
