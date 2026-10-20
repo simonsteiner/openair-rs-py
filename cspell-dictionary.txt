@@ -15,6 +15,7 @@ buochs
 capsys
 cdylib
 centerpoint
+codegen
 Danilo
 dbrgn
 depythonize
@@ -41,6 +42,7 @@ LFFFVL
 LFFFVPECHO
 LFZSMDSTAC
 linux
+lockfiles
 manylinux
 maturin
 MATZ
@@ -50,6 +52,7 @@ Minden
 mundolsheim
 musllinux
 Naviter
+ndjson
 NOFIR
 notam
 notamref
@@ -57,6 +60,8 @@ oneline
 openair
 ouavant
 Palz
+Podfile
+pubspec
 pyfunction
 pymodule
 pypa
@@ -71,6 +76,7 @@ SOMESPACE
 switzerland
 testpaths
 TIMSH
+topojson
 TRAFR
 unlim
 unltd

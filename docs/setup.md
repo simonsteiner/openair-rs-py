@@ -65,12 +65,16 @@ On commit, the hooks run against the staged files:
 - **Rust**: `cargo +nightly-2025-10-18 fmt`, then
   `cargo clippy --features python --all-targets -- -D warnings` on the whole crate
 - **Spelling**: `cspell` (project words go in `cspell-dictionary.txt`)
+- **File size**: `scripts/hooks/check-file-tokens.py` blocks any file over
+  5,000 tokens (bytes / 4) and prints how to split it. Files nobody writes by
+  hand, such as the airspace files in `example_data/`, are marked
+  `linguist-generated` in `.gitattributes` and skipped.
 
 On push, `cargo test --features serde` and `uv run pytest` run.
 
 Run the hooks by hand with `uv run lefthook run pre-commit` (add `--all-files`
-to check the whole repo). To skip them for one commit, use
-`git commit --no-verify`.
+to check the whole repo). To skip them for one commit in an emergency, use
+`LEFTHOOK=0 git commit …`.
 
 ## CI
 
