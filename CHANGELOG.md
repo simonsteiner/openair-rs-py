@@ -15,6 +15,8 @@ Possible log types:
 
 ### Unreleased
 
+- [changed] Dev tooling: the pre-commit token budget runs the shared `check-file-tokens.py` from the `simonsteiner/skills` lefthook remote (pinned to `filetokens.v1.0.0`) instead of a copy in `scripts/hooks/`; the first commit after `uv run lefthook install` needs network once
+
 ### v0.2.1 (2026-09-27)
 
 - [fixed] Latitudes whose degrees are padded to three digits like longitude's (`DP 004:45:57.000 N 076:00:46.000 W`) parse again. 0.1.x read them; 0.2.0 took upstream's two-digit limit and rejected the whole file. Degrees above 90 are still rejected

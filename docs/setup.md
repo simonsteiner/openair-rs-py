@@ -65,7 +65,8 @@ On commit, the hooks run against the staged files:
 - **Rust**: `cargo +nightly-2025-10-18 fmt`, then
   `cargo clippy --features python --all-targets -- -D warnings` on the whole crate
 - **Spelling**: `cspell` (project words go in `cspell-dictionary.txt`)
-- **File size**: `scripts/hooks/check-file-tokens.py` blocks any file over
+- **File size**: the `file-tokens` job (its script comes from the
+  [simonsteiner/skills](https://github.com/simonsteiner/skills) lefthook remote) blocks any file over
   5,000 tokens (bytes / 4) and prints how to split it. Files nobody writes by
   hand, such as the airspace files in `example_data/`, are marked
   `linguist-generated` in `.gitattributes` and skipped.
